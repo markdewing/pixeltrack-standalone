@@ -32,6 +32,9 @@ LIBNAMES := $(filter-out plugin-% bin test Makefile% plugins.txt%,$(wildcard *))
 ifneq ($(KOKKOS_DEVICE_PARALLEL),CUDA)
 LIBNAMES := $(filter-out CUDACore,$(LIBNAMES))
 endif
+ifneq ($(KOKKOS_DEVICE_PARALLEL),HIP)
+LIBNAMES := $(filter-out HIPCore,$(LIBNAMES))
+endif
 PLUGINNAMES := $(patsubst plugin-%,%,$(filter plugin-%,$(wildcard *)))
 MY_CXXFLAGS := -I$(TARGET_DIR) -DSRC_DIR=$(TARGET_DIR) -DLIB_DIR=$(LIB_DIR)/$(TARGET_NAME)
 MY_LDFLAGS := -ldl -Wl,-rpath,$(LIB_DIR)/$(TARGET_NAME)
@@ -126,7 +129,8 @@ endef
 $(foreach lib,$(PLUGINNAMES),$(eval $(call PLUGIN_template,$(lib))))
 
 # Files for unit tests
-TESTS_PORTABLE_SRC := $(wildcard $(TARGET_DIR)/test/kokkos/*.cc)
+#TESTS_PORTABLE_SRC := $(wildcard $(TARGET_DIR)/test/kokkos/*.cc)
+TESTS_PORTABLE_SRC := $(wildcard $(TARGET_DIR)/test/kokkos/testEigenGPU.cc)
 # serial backend
 TESTS_SERIAL_OBJ := $(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$(TESTS_PORTABLE_SRC:%=%.serial.o))
 TESTS_SERIAL_DEP := $(TESTS_SERIAL_OBJ:$.o=$.d)

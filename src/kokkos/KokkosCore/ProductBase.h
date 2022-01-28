@@ -12,6 +12,11 @@
 #include "CUDACore/SharedEventPtr.h"
 #include "CUDACore/SharedStreamPtr.h"
 #endif
+#ifdef KOKKOS_ENABLE_HIP
+#include "HIPCore/EventCache.h"
+#include "HIPCore/SharedEventPtr.h"
+#include "HIPCore/SharedStreamPtr.h"
+#endif
 #include "KokkosCore/ExecSpaceCache.h"
 #include "Framework/WaitingTaskHolder.h"
 #include "Framework/WaitingTaskWithArenaHolder.h"
@@ -85,6 +90,48 @@ namespace cms {
 
         int device() const { return space_->space().cuda_device(); }
         Kokkos::Cuda const& execSpace() const { return space_->space(); }
+
+      private:
+        bool isAvailable() const;
+
+        std::shared_ptr<ExecSpaceWrapper<Kokkos::Cuda>> space_;
+        cms::cuda::SharedEventPtr event_;
+      };
+#endif
+#ifdef KOKKOS_ENABLE_HIP
+      template <>
+      class ExecSpaceSpecific<Kokkos::Hip> : public ExecSpaceSpecificBase {
+      public:
+        ExecSpaceSpecific() : ExecSpaceSpecific(getExecSpaceCache<Kokkos::Hip>().get()) {}
+        explicit ExecSpaceSpecific(std::shared_ptr<ExecSpaceWrapper<Kokkos::Hip>> execSpace)
+            : ExecSpaceSpecific(std::move(execSpace), cms::hip::getEventCache().get()) {}
+        explicit ExecSpaceSpecific(std::shared_ptr<ExecSpaceWrapper<Kokkos::Hip>> execSpace,
+                                   cms::hip::SharedEventPtr event)
+            : space_(std::move(execSpace)), event_(std::move(event)) {}
+
+        ~ExecSpaceSpecific() override = default;
+
+        std::unique_ptr<ExecSpaceSpecific> cloneShareExecSpace() const {
+          return std::make_unique<ExecSpaceSpecific>(space_);
+        }
+
+        std::unique_ptr<ExecSpaceSpecific> cloneShareAll() const {
+          return std::make_unique<ExecSpaceSpecific>(space_, event_);
+        }
+
+        void recordEvent() {
+          // Intentionally not checking the return value to avoid throwing
+          // exceptions. If this call would fail, we should get failures
+          // elsewhere as well.
+          hipEventRecord(event_.get(), space_->stream());
+        }
+
+        void enqueueCallback(edm::WaitingTaskWithArenaHolder holder);
+
+        void synchronizeWith(ExecSpaceSpecific const& other);
+
+        int device() const { return space_->space().hip_device(); }
+        Kokkos::Hip const& execSpace() const { return space_->space(); }
 
       private:
         bool isAvailable() const;
