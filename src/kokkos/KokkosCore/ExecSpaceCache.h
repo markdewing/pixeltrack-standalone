@@ -85,5 +85,34 @@ namespace cms {
 }  // namespace cms
 
 #endif
+#ifdef KOKKOS_ENABLE_HIP
+#include "HIPCore/StreamCache.h"
+namespace cms {
+  namespace kokkos {
+    template <>
+    class ExecSpaceWrapper<Kokkos::Experimental::HIP> {
+    public:
+      ExecSpaceWrapper(Kokkos::Experimental::HIP space, cms::hip::SharedStreamPtr stream)
+          : space_(std::move(space)), stream_(std::move(stream)) {}
+
+      Kokkos::Experimental::HIP const& space() const { return space_; }
+      hipStream_t stream() const { return stream_.get(); }
+
+    private:
+      Kokkos::Experimental::HIP space_;
+      cms::hip::SharedStreamPtr stream_;
+    };
+
+    template <>
+    inline std::shared_ptr<ExecSpaceWrapper<Kokkos::Experimental::HIP>> ExecSpaceCache<Kokkos::Experimental::HIP>::get() {
+      return cache_->makeOrGet([]() {
+        auto streamPtr = cms::hip::getStreamCache().get();
+        return std::make_unique<ExecSpaceWrapper<Kokkos::Experimental::HIP>>(Kokkos::Experimental::HIP(streamPtr.get()), std::move(streamPtr));
+      });
+    }
+  }  // namespace kokkos
+}  // namespace cms
+
+#endif
 
 #endif

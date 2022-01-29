@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_CUDAUtilities_cudaCheck_h
-#define HeterogeneousCore_CUDAUtilities_cudaCheck_h
+#ifndef HeterogeneousCore_HIPUtilities_cudaCheck_h
+#define HeterogeneousCore_HIPUtilities_cudaCheck_h
 
 // C++ standard headers
 #include <iostream>

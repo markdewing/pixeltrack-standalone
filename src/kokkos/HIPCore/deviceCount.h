@@ -1,5 +1,5 @@
-#ifndef HeterogenousCore_CUDAUtilities_deviceCount_h
-#define HeterogenousCore_CUDAUtilities_deviceCount_h
+#ifndef HeterogenousCore_HIPUtilities_deviceCount_h
+#define HeterogenousCore_HIPUtilities_deviceCount_h
 
 #include "HIPCore/cudaCheck.h"
 

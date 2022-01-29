@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_CUDAUtilities_StreamCache_h
-#define HeterogeneousCore_CUDAUtilities_StreamCache_h
+#ifndef HeterogeneousCore_HIPUtilities_StreamCache_h
+#define HeterogeneousCore_HIPUtilities_StreamCache_h
 
 #include <vector>
 

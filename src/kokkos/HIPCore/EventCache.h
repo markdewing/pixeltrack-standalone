@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_CUDAUtilities_EventCache_h
-#define HeterogeneousCore_CUDAUtilities_EventCache_h
+#ifndef HeterogeneousCore_HIPUtilities_EventCache_h
+#define HeterogeneousCore_HIPUtilities_EventCache_h
 
 #include <vector>
 

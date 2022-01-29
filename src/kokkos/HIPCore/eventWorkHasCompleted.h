@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_CUDAUtilities_eventWorkHasCompleted_h
-#define HeterogeneousCore_CUDAUtilities_eventWorkHasCompleted_h
+#ifndef HeterogeneousCore_HIPUtilities_eventWorkHasCompleted_h
+#define HeterogeneousCore_HIPUtilities_eventWorkHasCompleted_h
 
 #include "HIPCore/cudaCheck.h"
 

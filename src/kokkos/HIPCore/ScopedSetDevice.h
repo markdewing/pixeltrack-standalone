@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_CUDAUtilities_ScopedSetDevice_h
-#define HeterogeneousCore_CUDAUtilities_ScopedSetDevice_h
+#ifndef HeterogeneousCore_HIPUtilities_ScopedSetDevice_h
+#define HeterogeneousCore_HIPUtilities_ScopedSetDevice_h
 
 #include "HIPCore/cudaCheck.h"
 

@@ -20,3 +20,12 @@ ifeq ($(KOKKOS_DEVICE_PARALLEL),CUDA)
   SiPixelRecHits_DEPENDS += CUDACore
   Validation_DEPENDS += CUDACore
 endif
+ifeq ($(KOKKOS_DEVICE_PARALLEL),HIP)
+  BeamSpotProducer_DEPENDS += HIPCore
+  KokkosCore_DEPENDS += HIPCore
+  PixelTriplets_DEPENDS += HIPCore
+  PixelVertexFinding_DEPENDS += HIPCore
+  SiPixelClusterizer_DEPENDS += HIPCore
+  SiPixelRecHits_DEPENDS += HIPCore
+  Validation_DEPENDS += HIPCore
+endif

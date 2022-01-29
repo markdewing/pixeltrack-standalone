@@ -100,12 +100,12 @@ namespace cms {
 #endif
 #ifdef KOKKOS_ENABLE_HIP
       template <>
-      class ExecSpaceSpecific<Kokkos::Hip> : public ExecSpaceSpecificBase {
+      class ExecSpaceSpecific<Kokkos::Experimental::HIP> : public ExecSpaceSpecificBase {
       public:
-        ExecSpaceSpecific() : ExecSpaceSpecific(getExecSpaceCache<Kokkos::Hip>().get()) {}
-        explicit ExecSpaceSpecific(std::shared_ptr<ExecSpaceWrapper<Kokkos::Hip>> execSpace)
+        ExecSpaceSpecific() : ExecSpaceSpecific(getExecSpaceCache<Kokkos::Experimental::HIP>().get()) {}
+        explicit ExecSpaceSpecific(std::shared_ptr<ExecSpaceWrapper<Kokkos::Experimental::HIP>> execSpace)
             : ExecSpaceSpecific(std::move(execSpace), cms::hip::getEventCache().get()) {}
-        explicit ExecSpaceSpecific(std::shared_ptr<ExecSpaceWrapper<Kokkos::Hip>> execSpace,
+        explicit ExecSpaceSpecific(std::shared_ptr<ExecSpaceWrapper<Kokkos::Experimental::HIP>> execSpace,
                                    cms::hip::SharedEventPtr event)
             : space_(std::move(execSpace)), event_(std::move(event)) {}
 
@@ -131,13 +131,13 @@ namespace cms {
         void synchronizeWith(ExecSpaceSpecific const& other);
 
         int device() const { return space_->space().hip_device(); }
-        Kokkos::Hip const& execSpace() const { return space_->space(); }
+        Kokkos::Experimental::HIP const& execSpace() const { return space_->space(); }
 
       private:
         bool isAvailable() const;
 
-        std::shared_ptr<ExecSpaceWrapper<Kokkos::Cuda>> space_;
-        cms::cuda::SharedEventPtr event_;
+        std::shared_ptr<ExecSpaceWrapper<Kokkos::Experimental::HIP>> space_;
+        cms::hip::SharedEventPtr event_;
       };
 #endif
     }  // namespace impl
