@@ -293,6 +293,13 @@ export SYCL_CUDA_FLAGS  := --cuda-path=$(CUDA_BASE) -Wno-unknown-cuda-version
 endif
 endif
 
+
+# OpenMP target offload
+
+export OPENMP_CXX := clang++
+export OPENMP_CXXFLAGS := -fPIC -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -fopenmp-offload-mandatory --cuda-path=$(CUDA_BASE)
+
+
 # force the recreation of the environment file any time the Makefile is updated, before building any other target
 -include environment
 
