@@ -297,7 +297,9 @@ endif
 # OpenMP target offload
 
 export OPENMP_CXX := clang++
-export OPENMP_CXXFLAGS := -fPIC -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -fopenmp-offload-mandatory --cuda-path=$(CUDA_BASE)
+export OPENMP_TARGETS := -fopenmp-targets=nvptx64-nvidia-cuda --cuda-path=$(CUDA_BASE)
+#export OPENMP_TARGETS := -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdhsa-amd-amdhsa  -march=gfx900
+export OPENMP_CXXFLAGS := -fPIC -fopenmp $(OPENMP_TARGETS) -fopenmp-offload-mandatory
 
 
 # force the recreation of the environment file any time the Makefile is updated, before building any other target
