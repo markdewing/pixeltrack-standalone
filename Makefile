@@ -296,10 +296,29 @@ endif
 
 # OpenMP target offload
 
-export OPENMP_CXX := clang++
-export OPENMP_TARGETS := -fopenmp-targets=nvptx64-nvidia-cuda --cuda-path=$(CUDA_BASE)
-#export OPENMP_TARGETS := -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdhsa-amd-amdhsa  -march=gfx900
-export OPENMP_CXXFLAGS := -fPIC -fopenmp $(OPENMP_TARGETS) -fopenmp-offload-mandatory
+OPENMP_COMPILER := LLVM
+#OPENMP_COMPILER := AMD
+#OPENMP_COMPILER := INTEL
+#OPENMP_COMPILER := NVIDIA
+
+ifeq ($(OPENMP_COMPILER), LLVM)
+  export OPENMP_CXX := clang++
+  # CUDA
+  export OPENMP_TARGETS := -fopenmp-targets=nvptx64-nvidia-cuda --cuda-path=$(CUDA_BASE)
+  # HIP
+  #export OPENMP_TARGETS := -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdhsa-amd-amdhsa  -march=gfx900
+  export OPENMP_CXXFLAGS := -fPIC -fopenmp $(OPENMP_TARGETS) -fopenmp-offload-mandatory
+else ifeq ($(OPENMP_COMPILER), AMD)
+  echo "aompcc not supported"
+  # aompcc doesn't support C++ files with .cc suffix
+  #export OPENMP_CXX := aompcc
+else ifeq ($(OPENMP_COMPILER), INTEL)
+  export OPENMP_CXX := icpx
+  export OPENMP_CXX_FLAGS := -fiopenmp -fopenmp-targets=spir64
+else ifeq ($(OPENMP_COMPILER), NVIDIA)
+  export OPENMP_CXX := nvc++
+  export OPENMP_CXX_FLAGS := -mp=gpu
+endif
 
 
 # force the recreation of the environment file any time the Makefile is updated, before building any other target
