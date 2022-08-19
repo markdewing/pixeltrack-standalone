@@ -74,8 +74,10 @@ $(foreach test,$(TESTS_EXE_CPU),$(eval $(call RUNTEST_template,$(test),auto)))
 -include $(ALL_DEPENDS)
 
 # Build targets
-$(TARGET): $(EXE_OBJ) $(LIBS) $(PLUGINS) | $(TESTS_EXE)
-	$(OPENMP_CXX) $(OPENMP_CXXFLAGS) $(EXE_OBJ) $(LDFLAGS) $(MY_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
+$(TARGET):  $(TESTS_EXE)
+
+#$(TARGET): $(EXE_OBJ) $(LIBS) $(PLUGINS) | $(TESTS_EXE)
+#	$(OPENMP_CXX) $(OPENMP_CXXFLAGS) $(EXE_OBJ) $(LDFLAGS) $(MY_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
 
 define BUILD_template
 $(OBJ_DIR)/$(2)/%.cc.o: $(SRC_DIR)/$(2)/%.cc
