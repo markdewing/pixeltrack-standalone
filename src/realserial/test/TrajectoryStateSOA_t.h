@@ -30,7 +30,7 @@ using TS = TrajectoryStateSoA<128>;
 
   TS& ts = *pts;
 
-  int first = 0 + blockIdx.x * blockDim.x;
+  int first = 0;
 
   for (int i = first; i < n; i += blockDim.x) {
     ts.copyFromDense(par0, cov0, i);

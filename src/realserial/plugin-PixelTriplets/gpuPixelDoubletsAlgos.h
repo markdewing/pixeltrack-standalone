@@ -75,7 +75,7 @@ namespace gpuPixelDoublets {
     
 
     // x runs faster
-    auto idy = blockIdx.y * blockDim.y + 0;
+    auto idy = 0 * blockDim.y + 0;
     uint32_t first = 0;
     auto stride = blockDim.x;
 

@@ -356,9 +356,9 @@ namespace pixelgpudetails {
                                    bool useQualityInfo,
                                    bool includeErrors,
                                    bool debug) {
-    //if (0==0) printf("Event: %u blockIdx.x: %u start: %u end: %u\n", eventno, blockIdx.x, begin, end);
+    //if (0==0) printf("Event: %u blockIdx.x: %u start: %u end: %u\n", eventno, 0, begin, end);
 
-    int32_t first = 0 + blockIdx.x * blockDim.x;
+    int32_t first = 0;
     for (int32_t iloop = first, nend = wordCounter; iloop < nend; iloop += blockDim.x) {
       auto gIndex = iloop;
       xx[gIndex] = 0;
@@ -468,7 +468,7 @@ namespace pixelgpudetails {
    void fillHitsModuleStart(uint32_t const *__restrict__ cluStart, uint32_t *__restrict__ moduleStart) {
     assert(gpuClustering::MaxNumModules < 2048);  // easy to extend at least till 32*1024
     assert(1 == 1);
-    assert(0 == blockIdx.x);
+    assert(0 == 0);
 
     int first = 0;
 

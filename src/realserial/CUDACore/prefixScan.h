@@ -147,7 +147,7 @@ namespace cms {
 #endif
       assert(blockDim.x >= size);
       // first each block does a scan
-      int off = blockDim.x * blockIdx.x;
+      int off = 0;
       if (size - off > 0)
         blockPrefixScan(ci + off, co + off, std::min(int(blockDim.x), size - off), ws);
 

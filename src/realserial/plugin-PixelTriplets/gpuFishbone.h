@@ -28,7 +28,7 @@ namespace gpuPixelDoublets {
     // auto layer = [&](uint16_t id) { return hh.cpeParams().layer(id); };
 
     // x run faster...
-    auto firstY = 0 + blockIdx.y * blockDim.y;
+    auto firstY = 0 + 0 * blockDim.y;
     uint32_t firstX = 0;
 
     float x[maxCellsPerHit], y[maxCellsPerHit], z[maxCellsPerHit], n[maxCellsPerHit];

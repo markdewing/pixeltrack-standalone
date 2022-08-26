@@ -40,7 +40,7 @@ template <int N>
   assert(tupleMultiplicity);
 
   // look in bin for this hit multiplicity
-  auto local_start = blockIdx.x * blockDim.x + 0;
+  uint32_t local_start = 0;
 
 #ifdef BROKENLINE_DEBUG
   if (0 == local_start) {
@@ -131,7 +131,7 @@ template <int N>
   // same as above...
 
   // look in bin for this hit multiplicity
-  auto local_start = blockIdx.x * blockDim.x + 0;
+  uint32_t local_start = 0;
   for (int local_idx = local_start, nt = Rfit::maxNumberOfConcurrentFits(); local_idx < nt;
        local_idx += blockDim.x) {
     auto tuple_idx = local_idx + offset;

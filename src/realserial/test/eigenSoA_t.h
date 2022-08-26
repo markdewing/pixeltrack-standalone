@@ -25,7 +25,7 @@ using V = MySoA<128>;
 
    eigenSoA::MatrixSoA<M3, 64> m;
 
-  int first = 0 + blockIdx.x * blockDim.x;
+  int first = 0;
   if (0 == first)
     printf("before %f\n", p[0]);
 

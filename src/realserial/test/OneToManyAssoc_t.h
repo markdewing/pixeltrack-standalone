@@ -19,7 +19,7 @@ using Multiplicity = cms::cuda::OneToManyAssoc<uint16_t, 8, MaxTk>;
 using TK = std::array<uint16_t, 4>;
 
  void countMultiLocal(TK const* __restrict__ tk, Multiplicity* __restrict__ assoc, int32_t n) {
-  int first = blockDim.x * blockIdx.x + 0;
+  int first = 0;
   for (int i = first; i < n; i += blockDim.x) {
      Multiplicity::CountersOnly local;
     if (true)
@@ -33,19 +33,19 @@ using TK = std::array<uint16_t, 4>;
 }
 
  void countMulti(TK const* __restrict__ tk, Multiplicity* __restrict__ assoc, int32_t n) {
-  int first = blockDim.x * blockIdx.x + 0;
+  int first = 0;
   for (int i = first; i < n; i += blockDim.x)
     assoc->countDirect(2 + i % 4);
 }
 
  void verifyMulti(Multiplicity* __restrict__ m1, Multiplicity* __restrict__ m2) {
-  auto first = blockDim.x * blockIdx.x + 0;
+  uint32_t first = 0;
   for (auto i = first; i < Multiplicity::totbins(); i += blockDim.x)
     assert(m1->off[i] == m2->off[i]);
 }
 
  void count(TK const* __restrict__ tk, Assoc* __restrict__ assoc, int32_t n) {
-  int first = blockDim.x * blockIdx.x + 0;
+  int first = 0;
   for (int i = first; i < 4 * n; i += blockDim.x) {
     auto k = i / 4;
     auto j = i - 4 * k;
@@ -58,7 +58,7 @@ using TK = std::array<uint16_t, 4>;
 }
 
  void fill(TK const* __restrict__ tk, Assoc* __restrict__ assoc, int32_t n) {
-  int first = blockDim.x * blockIdx.x + 0;
+  int first = 0;
   for (int i = first; i < 4 * n; i += blockDim.x) {
     auto k = i / 4;
     auto j = i - 4 * k;
@@ -74,7 +74,7 @@ using TK = std::array<uint16_t, 4>;
 
 template <typename Assoc>
  void fillBulk(AtomicPairCounter* apc, TK const* __restrict__ tk, Assoc* __restrict__ assoc, int32_t n) {
-  int first = blockDim.x * blockIdx.x + 0;
+  int first = 0;
   for (int k = first; k < n; k += blockDim.x) {
     auto m = tk[k][3] < MaxElem ? 4 : 3;
     assoc->bulkFill(*apc, &tk[k][0], m);
