@@ -49,7 +49,7 @@ namespace gpuVertexFinder {
 
        uint32_t nq;  // number of track for this vertex
       nq = 0;
-      __syncthreads();
+      
 
       // copy to local
       for (auto k = threadIdx.x; k < nt; k += blockDim.x) {
@@ -64,13 +64,13 @@ namespace gpuVertexFinder {
 
        float znew[2], wnew[2];  // the new vertices
 
-      __syncthreads();
+      
       assert(int(nq) == nn[kv] + 1);
 
       int maxiter = 20;
       // kt-min....
       bool more = true;
-      while (__syncthreads_or(more)) {
+      while (more) {
         more = false;
         if (0 == threadIdx.x) {
           znew[0] = 0;
@@ -78,18 +78,18 @@ namespace gpuVertexFinder {
           wnew[0] = 0;
           wnew[1] = 0;
         }
-        __syncthreads();
+        
         for (auto k = threadIdx.x; k < nq; k += blockDim.x) {
           auto i = newV[k];
           atomicAdd(&znew[i], zz[k] * ww[k]);
           atomicAdd(&wnew[i], ww[k]);
         }
-        __syncthreads();
+        
         if (0 == threadIdx.x) {
           znew[0] /= wnew[0];
           znew[1] /= wnew[1];
         }
-        __syncthreads();
+        
         for (auto k = threadIdx.x; k < nq; k += blockDim.x) {
           auto d0 = fabs(zz[k] - znew[0]);
           auto d1 = fabs(zz[k] - znew[1]);
@@ -121,7 +121,7 @@ namespace gpuVertexFinder {
        uint32_t igv;
       if (0 == threadIdx.x)
         igv = atomicAdd(&ws.nvIntermediate, 1);
-      __syncthreads();
+      
       for (auto k = threadIdx.x; k < nq; k += blockDim.x) {
         if (1 == newV[k])
           iv[it[k]] = igv;

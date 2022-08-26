@@ -66,17 +66,17 @@ namespace cms {
           ws[warpId] = co[i];
         mask = __ballot_sync(mask, i + blockDim.x < size);
       }
-      __syncthreads();
+      
       if (size <= 32)
         return;
       if (threadIdx.x < 32)
         warpPrefixScan(ws, threadIdx.x, 0xffffffff);
-      __syncthreads();
+      
       for (auto i = first + 32; i < size; i += blockDim.x) {
         auto warpId = i / 32;
         co[i] += ws[warpId - 1];
       }
-      __syncthreads();
+      
 #else
       co[0] = ci[0];
       for (uint32_t i = 1; i < size; ++i)
@@ -110,17 +110,17 @@ namespace cms {
           ws[warpId] = c[i];
         mask = __ballot_sync(mask, i + blockDim.x < size);
       }
-      __syncthreads();
+      
       if (size <= 32)
         return;
       if (threadIdx.x < 32)
         warpPrefixScan(ws, threadIdx.x, 0xffffffff);
-      __syncthreads();
+      
       for (auto i = first + 32; i < size; i += blockDim.x) {
         auto warpId = i / 32;
         c[i] += ws[warpId - 1];
       }
-      __syncthreads();
+      
 #else
       for (uint32_t i = 1; i < size; ++i)
         c[i] += c[i - 1];
@@ -154,12 +154,12 @@ namespace cms {
       // count blocks that finished
        bool isLastBlockDone;
       if (0 == threadIdx.x) {
-        __threadfence();
+        
         auto value = atomicAdd(pc, 1);  // block counter
         isLastBlockDone = (value == (int(gridDim.x) - 1));
       }
 
-      __syncthreads();
+      
 
       if (!isLastBlockDone)
         return;
@@ -174,7 +174,6 @@ namespace cms {
         auto j = blockDim.x * i + blockDim.x - 1;
         psum[i] = (j < size) ? co[j] : T(0);
       }
-      __syncthreads();
       blockPrefixScan(psum, psum, gridDim.x, ws);
 
       // now it would have been handy to have the other blocks around...

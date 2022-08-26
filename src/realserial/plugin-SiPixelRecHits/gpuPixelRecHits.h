@@ -111,7 +111,7 @@ namespace gpuPixelRecHits {
 
         first += threadIdx.x;
 
-        __syncthreads();
+        
 
         // one thead per "digi"
 
@@ -135,7 +135,7 @@ namespace gpuPixelRecHits {
           atomicMax(&clusParams.maxCol[cl], y);
         }
 
-        __syncthreads();
+        
 
         // pixmx is not available in the binary dumps
         //auto pixmx = cpeParams->detParams(me).pixmx;
@@ -166,7 +166,7 @@ namespace gpuPixelRecHits {
             atomicAdd(&clusParams.Q_l_Y[cl], ch);
         }
 
-        __syncthreads();
+        
 
         // next one cluster per thread...
 
@@ -216,7 +216,7 @@ namespace gpuPixelRecHits {
           hits.rGlobal(h) = std::sqrt(xg * xg + yg * yg);
           hits.iphi(h) = unsafe_atan2s<7>(yg, xg);
         }
-        __syncthreads();
+        
       }  // end loop on batches
     }    // loop over modules
   }

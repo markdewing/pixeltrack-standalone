@@ -69,7 +69,7 @@ namespace gpuClustering {
       for (auto i = threadIdx.x; i < nclus; i += blockDim.x) {
         charge[i] = 0;
       }
-      __syncthreads();
+      
 
       for (auto i = first; i < numElements; i += blockDim.x) {
         if (id[i] == InvId)
@@ -78,14 +78,14 @@ namespace gpuClustering {
           break;  // end of module
         atomicAdd(&charge[clusterId[i]], adc[i]);
       }
-      __syncthreads();
+      
 
       auto chargeCut = thisModuleId < 96 ? 2000 : 4000;  // move in constants (calib?)
       for (auto i = threadIdx.x; i < nclus; i += blockDim.x) {
         newclusId[i] = ok[i] = charge[i] > chargeCut ? 1 : 0;
       }
 
-      __syncthreads();
+      
 
       // renumber
        uint16_t ws[32];
@@ -97,14 +97,14 @@ namespace gpuClustering {
         continue;
 
       nClustersInModule[thisModuleId] = newclusId[nclus - 1];
-      __syncthreads();
+      
 
       // mark bad cluster again
       for (auto i = threadIdx.x; i < nclus; i += blockDim.x) {
         if (0 == ok[i])
           newclusId[i] = InvId + 1;
       }
-      __syncthreads();
+      
 
       // reassign id
       for (auto i = first; i < numElements; i += blockDim.x) {

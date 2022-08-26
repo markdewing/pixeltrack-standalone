@@ -66,7 +66,7 @@ namespace gpuClustering {
 
       // find the index of the first pixel not belonging to this module (or invalid)
       msize = numElements;
-      __syncthreads();
+      
 
       // skip threads not associated to an existing pixel
       for (int i = first; i < numElements; i += blockDim.x) {
@@ -87,7 +87,7 @@ namespace gpuClustering {
       for (auto j = threadIdx.x; j < Hist::totbins(); j += blockDim.x) {
         hist.off[j] = 0;
       }
-      __syncthreads();
+      
 
       assert((msize == numElements) or ((msize < numElements) and (id[msize] != thisModuleId)));
 
@@ -99,13 +99,13 @@ namespace gpuClustering {
         }
       }
 
-      __syncthreads();
+      
       assert(msize - firstPixel <= maxPixInModule);
 
 #ifdef GPU_DEBUG
        uint32_t totGood;
       totGood = 0;
-      __syncthreads();
+      
 #endif
 
       // fill histo
@@ -117,12 +117,12 @@ namespace gpuClustering {
         atomicAdd(&totGood, 1);
 #endif
       }
-      __syncthreads();
+      
       if (threadIdx.x < 32)
         ws[threadIdx.x] = 0;  // used by prefix scan...
-      __syncthreads();
+      
       hist.finalize(ws);
-      __syncthreads();
+      
 #ifdef GPU_DEBUG
       assert(hist.size() == totGood);
       if (thisModuleId % 100 == 1)
@@ -150,27 +150,27 @@ namespace gpuClustering {
       for (uint32_t k = 0; k < maxiter; ++k)
         nnn[k] = 0;
 
-      __syncthreads();  // for hit filling!
+        // for hit filling!
 
 #ifdef GPU_DEBUG
       // look for anomalous high occupancy
        uint32_t n40, n60;
       n40 = n60 = 0;
-      __syncthreads();
+      
       for (auto j = threadIdx.x; j < Hist::nbins(); j += blockDim.x) {
         if (hist.size(j) > 60)
           atomicAdd(&n60, 1);
         if (hist.size(j) > 40)
           atomicAdd(&n40, 1);
       }
-      __syncthreads();
+      
       if (0 == threadIdx.x) {
         if (n60 > 0)
           printf("columns with more than 60 px %d in %d\n", n60, thisModuleId);
         else if (n40 > 0)
           printf("columns with more than 40 px %d in %d\n", n40, thisModuleId);
       }
-      __syncthreads();
+      
 #endif
 
       // fill NN
@@ -203,7 +203,7 @@ namespace gpuClustering {
       // pixel in the cluster ( clus[i] == i ).
       bool more = true;
       int nloops = 0;
-      while (__syncthreads_or(more)) {
+      while (more) {
         if (1 == nloops % 2) {
           for (auto j = threadIdx.x, k = 0U; j < hist.size(); j += blockDim.x, ++k) {
             auto p = hist.begin() + j;
@@ -239,9 +239,9 @@ namespace gpuClustering {
          int n0;
         if (threadIdx.x == 0)
           n0 = nloops;
-        __syncthreads();
+        
         auto ok = n0 == nloops;
-        assert(__syncthreads_and(ok));
+        assert(ok);
         if (thisModuleId % 100 == 1)
           if (threadIdx.x == 0)
             printf("# loops %d\n", nloops);
@@ -250,7 +250,7 @@ namespace gpuClustering {
 
        unsigned int foundClusters;
       foundClusters = 0;
-      __syncthreads();
+      
 
       // find the number of different clusters, identified by a pixels with clus[i] == i;
       // mark these pixels with a negative id.
@@ -262,7 +262,7 @@ namespace gpuClustering {
           clusterId[i] = -(old + 1);
         }
       }
-      __syncthreads();
+      
 
       // propagate the negative id to all the pixels in the cluster.
       for (int i = first; i < msize; i += blockDim.x) {
@@ -273,7 +273,7 @@ namespace gpuClustering {
           clusterId[i] = clusterId[clusterId[i]];
         }
       }
-      __syncthreads();
+      
 
       // adjust the cluster id to be a positive value starting from 0
       for (int i = first; i < msize; i += blockDim.x) {
@@ -283,7 +283,7 @@ namespace gpuClustering {
         }
         clusterId[i] = -clusterId[i] - 1;
       }
-      __syncthreads();
+      
 
       if (threadIdx.x == 0) {
         nClustersInModule[thisModuleId] = foundClusters;

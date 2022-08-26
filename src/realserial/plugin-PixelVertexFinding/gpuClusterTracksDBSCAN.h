@@ -50,7 +50,7 @@ namespace gpuVertexFinder {
     for (auto j = threadIdx.x; j < Hist::totbins(); j += blockDim.x) {
       hist.off[j] = 0;
     }
-    __syncthreads();
+    
 
     if (verbose && 0 == threadIdx.x)
       printf("booked hist with %d bins, size %d for %d tracks\n", hist.nbins(), hist.capacity(), nt);
@@ -70,17 +70,17 @@ namespace gpuVertexFinder {
       iv[i] = i;
       nn[i] = 0;
     }
-    __syncthreads();
+    
     if (threadIdx.x < 32)
       hws[threadIdx.x] = 0;  // used by prefix scan...
-    __syncthreads();
+    
     hist.finalize(hws);
-    __syncthreads();
+    
     assert(hist.size() == nt);
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
       hist.fill(izt[i], uint16_t(i));
     }
-    __syncthreads();
+    
 
     // count neighbours
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
@@ -99,7 +99,7 @@ namespace gpuVertexFinder {
       cms::cuda::forEachInBins(hist, izt[i], 1, loop);
     }
 
-    __syncthreads();
+    
 
     // find NN with smaller z...
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
@@ -121,7 +121,7 @@ namespace gpuVertexFinder {
       cms::cuda::forEachInBins(hist, izt[i], 1, loop);
     }
 
-    __syncthreads();
+    
 
 #ifdef GPU_DEBUG
     //  mini verification
@@ -129,7 +129,7 @@ namespace gpuVertexFinder {
       if (iv[i] != int(i))
         assert(iv[iv[i]] != int(i));
     }
-    __syncthreads();
+    
 #endif
 
     // consolidate graph (percolate index of seed)
@@ -140,7 +140,7 @@ namespace gpuVertexFinder {
       iv[i] = m;
     }
 
-    __syncthreads();
+    
 
 #ifdef GPU_DEBUG
     //  mini verification
@@ -148,7 +148,7 @@ namespace gpuVertexFinder {
       if (iv[i] != int(i))
         assert(iv[iv[i]] != int(i));
     }
-    __syncthreads();
+    
 #endif
 
 #ifdef GPU_DEBUG
@@ -174,7 +174,6 @@ namespace gpuVertexFinder {
       };
       cms::cuda::forEachInBins(hist, izt[i], 1, loop);
     }
-    __syncthreads();
 #endif
 
     // collect edges (assign to closest cluster of closest point??? here to closest point)
@@ -199,7 +198,6 @@ namespace gpuVertexFinder {
 
     unsigned int foundClusters;
     foundClusters = 0;
-    __syncthreads();
 
     // find the number of different clusters, identified by a tracks with clus[i] == i;
     // mark these tracks with a negative id.
@@ -213,7 +211,6 @@ namespace gpuVertexFinder {
         }
       }
     }
-    __syncthreads();
 
     assert(foundClusters < ZVertices::MAXVTX);
 
@@ -224,7 +221,6 @@ namespace gpuVertexFinder {
         iv[i] = iv[iv[i]];
       }
     }
-    __syncthreads();
 
     // adjust the cluster id to be a positive value starting from 0
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {

@@ -484,7 +484,7 @@ namespace pixelgpudetails {
     for (int i = first + 1025, iend = gpuClustering::MaxNumModules + 1; i < iend; i += blockDim.x) {
       moduleStart[i] += moduleStart[1024];
     }
-    __syncthreads();
+    
 
 #ifdef GPU_DEBUG
     assert(0 == moduleStart[0]);

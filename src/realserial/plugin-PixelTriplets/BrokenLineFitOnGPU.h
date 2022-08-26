@@ -68,7 +68,7 @@ template <int N>
 #ifdef BL_DUMP_HITS
      int done;
     done = 0;
-    __syncthreads();
+    
     bool dump = (foundNtuplets->size(tkid) == 5 && 0 == atomicAdd(&done, 1));
 #endif
 

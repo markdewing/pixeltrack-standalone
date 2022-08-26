@@ -72,7 +72,7 @@ namespace gpuPixelDoublets {
       }
       ntot = innerLayerCumulativeSize[nPairs - 1];
     }
-    __syncthreads();
+    
 
     // x runs faster
     auto idy = blockIdx.y * blockDim.y + threadIdx.y;

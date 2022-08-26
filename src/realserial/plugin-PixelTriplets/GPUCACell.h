@@ -74,7 +74,7 @@ public:
       } else
         return -1;
     }
-    __threadfence();
+    
     return outerNeighbors().push_back(t);
   }
 
@@ -87,7 +87,7 @@ public:
       } else
         return -1;
     }
-    __threadfence();
+    
     return tracks().push_back(t);
   }
 

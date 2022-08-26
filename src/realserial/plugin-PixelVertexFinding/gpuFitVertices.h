@@ -51,7 +51,7 @@ namespace gpuVertexFinder {
     if (verbose && 0 == threadIdx.x)
       noise = 0;
 
-    __syncthreads();
+    
 
     // compute cluster location
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
@@ -67,14 +67,14 @@ namespace gpuVertexFinder {
       atomicAdd(&wv[iv[i]], w);
     }
 
-    __syncthreads();
+    
     // reuse nn
     for (auto i = threadIdx.x; i < foundClusters; i += blockDim.x) {
       assert(wv[i] > 0.f);
       zv[i] /= wv[i];
       nn[i] = -1;  // ndof
     }
-    __syncthreads();
+    
 
     // compute chi2
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
@@ -90,7 +90,7 @@ namespace gpuVertexFinder {
       atomicAdd(&chi2[iv[i]], c2);
       atomicAdd(&nn[iv[i]], 1);
     }
-    __syncthreads();
+    
     for (auto i = threadIdx.x; i < foundClusters; i += blockDim.x)
       if (nn[i] > 0)
         wv[i] *= float(nn[i]) / chi2[i];

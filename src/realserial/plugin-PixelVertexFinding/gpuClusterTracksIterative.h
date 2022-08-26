@@ -50,7 +50,7 @@ namespace gpuVertexFinder {
     for (auto j = threadIdx.x; j < Hist::totbins(); j += blockDim.x) {
       hist.off[j] = 0;
     }
-    __syncthreads();
+    
 
     if (verbose && 0 == threadIdx.x)
       printf("booked hist with %d bins, size %d for %d tracks\n", hist.nbins(), hist.capacity(), nt);
@@ -70,17 +70,17 @@ namespace gpuVertexFinder {
       iv[i] = i;
       nn[i] = 0;
     }
-    __syncthreads();
+    
     if (threadIdx.x < 32)
       hws[threadIdx.x] = 0;  // used by prefix scan...
-    __syncthreads();
+    
     hist.finalize(hws);
-    __syncthreads();
+    
     assert(hist.size() == nt);
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
       hist.fill(izt[i], uint16_t(i));
     }
-    __syncthreads();
+    
 
     // count neighbours
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
@@ -103,11 +103,11 @@ namespace gpuVertexFinder {
      int nloops;
     nloops = 0;
 
-    __syncthreads();
+    
 
     // cluster seeds only
     bool more = true;
-    while (__syncthreads_or(more)) {
+    while (more) {
       if (1 == nloops % 2) {
         for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
           auto m = iv[i];
@@ -170,7 +170,7 @@ namespace gpuVertexFinder {
 
      unsigned int foundClusters;
     foundClusters = 0;
-    __syncthreads();
+    
 
     // find the number of different clusters, identified by a tracks with clus[i] == i;
     // mark these tracks with a negative id.
@@ -184,7 +184,7 @@ namespace gpuVertexFinder {
         }
       }
     }
-    __syncthreads();
+    
 
     assert(foundClusters < ZVertices::MAXVTX);
 
@@ -195,7 +195,7 @@ namespace gpuVertexFinder {
         iv[i] = iv[iv[i]];
       }
     }
-    __syncthreads();
+    
 
     // adjust the cluster id to be a positive value starting from 0
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
