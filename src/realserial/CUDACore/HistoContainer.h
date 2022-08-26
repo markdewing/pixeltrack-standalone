@@ -50,9 +50,7 @@ namespace cms {
     template <typename Histo>
     inline __attribute__((always_inline)) void launchZero(Histo *__restrict__ h,
                                                           cudaStream_t stream
-#ifndef __CUDACC__
                                                           = cudaStreamDefault
-#endif
     ) {
       uint32_t *poff = (uint32_t *)((char *)(h) + offsetof(Histo, off));
       int32_t size = offsetof(Histo, bins) - offsetof(Histo, off);
@@ -63,9 +61,7 @@ namespace cms {
     template <typename Histo>
     inline __attribute__((always_inline)) void launchFinalize(Histo *__restrict__ h,
                                                               cudaStream_t stream
-#ifndef __CUDACC__
                                                               = cudaStreamDefault
-#endif
     ) {
       h->finalize();
     }
@@ -78,9 +74,7 @@ namespace cms {
                                                                   uint32_t totSize,
                                                                   int nthreads,
                                                                   cudaStream_t stream
-#ifndef __CUDACC__
                                                                   = cudaStreamDefault
-#endif
     ) {
       launchZero(h, stream);
       countFromVector(h, nh, v, offsets);

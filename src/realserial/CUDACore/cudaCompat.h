@@ -5,7 +5,6 @@
  * Everything you need to run cuda code in plain sequential c++ code
  */
 
-#ifndef __CUDACC__
 
 #include <algorithm>
 #include <cstdint>
@@ -93,7 +92,5 @@ namespace cms {
 using namespace cms::cudacompat;
 
 
-
-#endif  // __CUDACC__
 
 #endif  // HeterogeneousCore_CUDAUtilities_interface_cudaCompat_h
