@@ -15,7 +15,7 @@ namespace gpuVertexFinder {
     auto const* quality = tracks.qualityData();
 
     uint32_t first = 0;
-    for (int idx = first, nt = TkSoA::stride(); idx < nt; idx += blockDim.x) {
+    for (int idx = first, nt = TkSoA::stride(); idx < nt; idx++) {
       auto nHits = tracks.nHits(idx);
       if (nHits == 0)
         break;  // this is a guard: maybe we need to move to nTracks...

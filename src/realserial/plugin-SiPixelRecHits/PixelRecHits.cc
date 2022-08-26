@@ -19,7 +19,7 @@ namespace {
 
     int begin = 0;
     constexpr int end = 11;
-    for (int i = begin; i < end; i += blockDim.x) {
+    for (int i = begin; i < end; i++) {
       hitsLayerStart[i] = hitsModuleStart[cpeParams->layerGeometry().layerStart[i]];
 #ifdef GPU_DEBUG
       printf("LayerStart %d %d: %d\n", i, cpeParams->layerGeometry().layerStart[i], hitsLayerStart[i]);

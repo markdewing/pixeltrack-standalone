@@ -31,7 +31,7 @@ using V = MySoA<128>;
 
   // a silly game...
   int n = 64;
-  for (int i = first; i < n; i += blockDim.x) {
+  for (int i = first; i < n; i++) {
     m[i].setZero();
     m[i](0, 0) = p[i];
     m[i](1, 1) = p[i + 64];
@@ -39,11 +39,11 @@ using V = MySoA<128>;
   }
     // not needed
 
-  for (int i = first; i < n; i += blockDim.x)
+  for (int i = first; i < n; i++)
     m[i] = m[i].inverse().eval();
   
 
-  for (int i = first; i < n; i += blockDim.x) {
+  for (int i = first; i < n; i++) {
     p[i] = m[63 - i](0, 0);
     p[i + 64] = m[63 - i](1, 1);
     p[i + 64 * 2] = m[63 - i](2, 2);

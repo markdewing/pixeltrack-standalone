@@ -32,7 +32,7 @@ using TS = TrajectoryStateSoA<128>;
 
   int first = 0;
 
-  for (int i = first; i < n; i += blockDim.x) {
+  for (int i = first; i < n; i++) {
     ts.copyFromDense(par0, cov0, i);
     Vector5d par1;
     Matrix5d cov1;

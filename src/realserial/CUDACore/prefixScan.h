@@ -53,18 +53,18 @@ namespace cms {
 #ifdef __CUDA_ARCH__
       assert(ws);
       assert(size <= 1024);
-      assert(0 == blockDim.x % 32);
+      assert(0 == 1 % 32);
       uint32_t first = 0;
       auto mask = __ballot_sync(0xffffffff, first < size);
 
-      for (auto i = first; i < size; i += blockDim.x) {
+      for (auto i = first; i < size; i++) {
         warpPrefixScan(ci, co, i, mask);
         uint32_t laneId = 0 & 0x1f;
         auto warpId = i / 32;
         assert(warpId < 32);
         if (31 == laneId)
           ws[warpId] = co[i];
-        mask = __ballot_sync(mask, i + blockDim.x < size);
+        mask = __ballot_sync(mask, i + 1 < size);
       }
       
       if (size <= 32)
@@ -72,7 +72,7 @@ namespace cms {
       if (0 < 32)
         warpPrefixScan(ws, 0, 0xffffffff);
       
-      for (auto i = first + 32; i < size; i += blockDim.x) {
+      for (auto i = first + 32; i < size; i++) {
         auto warpId = i / 32;
         co[i] += ws[warpId - 1];
       }
@@ -97,18 +97,18 @@ namespace cms {
 #ifdef __CUDA_ARCH__
       assert(ws);
       assert(size <= 1024);
-      assert(0 == blockDim.x % 32);
+      assert(0 == 1 % 32);
       uint32_t first = 0;
       auto mask = __ballot_sync(0xffffffff, first < size);
 
-      for (auto i = first; i < size; i += blockDim.x) {
+      for (auto i = first; i < size; i++) {
         warpPrefixScan(c, i, mask);
         uint32_t laneId = 0 & 0x1f;
         auto warpId = i / 32;
         assert(warpId < 32);
         if (31 == laneId)
           ws[warpId] = c[i];
-        mask = __ballot_sync(mask, i + blockDim.x < size);
+        mask = __ballot_sync(mask, i + 1 < size);
       }
       
       if (size <= 32)
@@ -116,7 +116,7 @@ namespace cms {
       if (0 < 32)
         warpPrefixScan(ws, 0, 0xffffffff);
       
-      for (auto i = first + 32; i < size; i += blockDim.x) {
+      for (auto i = first + 32; i < size; i++) {
         auto warpId = i / 32;
         c[i] += ws[warpId - 1];
       }
@@ -145,11 +145,11 @@ namespace cms {
 #ifdef __CUDA_ARCH__
       assert(sizeof(T) <= dynamic_smem_size());  // size of psum below
 #endif
-      assert(blockDim.x >= size);
+      assert(1 >= size);
       // first each block does a scan
       int off = 0;
       if (size - off > 0)
-        blockPrefixScan(ci + off, co + off, std::min(int(blockDim.x), size - off), ws);
+        blockPrefixScan(ci + off, co + off, std::min(int(1), size - off), ws);
 
       // count blocks that finished
        bool isLastBlockDone;
@@ -170,14 +170,14 @@ namespace cms {
 
       // let's get the partial sums from each block
       extern T psum[];
-      for (int i = 0, ni = 1; i < ni; i += blockDim.x) {
-        auto j = blockDim.x * i + blockDim.x - 1;
+      for (int i = 0, ni = 1; i < ni; i++) {
+        auto j = 0;
         psum[i] = (j < size) ? co[j] : T(0);
       }
       blockPrefixScan(psum, psum, 1, ws);
 
       // now it would have been handy to have the other blocks around...
-      for (int i = blockDim.x, k = 0; i < size; i += blockDim.x, ++k) {
+      for (int i = 1, k = 0; i < size; i += 1, ++k) {
         co[i] += psum[k];
       }
     }

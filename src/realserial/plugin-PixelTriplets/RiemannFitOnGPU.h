@@ -43,7 +43,7 @@ template <int N>
 #endif
 
   for (int local_idx = local_start, nt = Rfit::maxNumberOfConcurrentFits(); local_idx < nt;
-       local_idx += blockDim.x) {
+       local_idx++) {
     auto tuple_idx = local_idx + offset;
     if (tuple_idx >= tupleMultiplicity->size(nHits))
       break;
@@ -99,7 +99,7 @@ template <int N>
   // look in bin for this hit multiplicity
   uint32_t local_start = 0;
   for (int local_idx = local_start, nt = Rfit::maxNumberOfConcurrentFits(); local_idx < nt;
-       local_idx += blockDim.x) {
+       local_idx++) {
     auto tuple_idx = local_idx + offset;
     if (tuple_idx >= tupleMultiplicity->size(nHits))
       break;
@@ -142,7 +142,7 @@ template <int N>
   // look in bin for this hit multiplicity
   auto local_start = (0);
   for (int local_idx = local_start, nt = Rfit::maxNumberOfConcurrentFits(); local_idx < nt;
-       local_idx += blockDim.x) {
+       local_idx++) {
     auto tuple_idx = local_idx + offset;
     if (tuple_idx >= tupleMultiplicity->size(nHits))
       break;

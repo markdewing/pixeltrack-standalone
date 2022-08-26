@@ -19,8 +19,6 @@ namespace cms {
       uint32_t x, y, z;
     };
 
-    const dim3 blockDim = {1, 1, 1};
-
     template <typename T1, typename T2>
     T1 atomicCAS(T1* address, T1 compare, T2 val) {
       T1 old = *address;
