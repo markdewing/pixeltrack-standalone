@@ -12,7 +12,7 @@ template <typename T>
  void  warpPrefixScan(T const* __restrict__ ci, T* __restrict__ co, uint32_t i, uint32_t mask) {
   // ci and co may be the same
   auto x = ci[i];
-  auto laneId = threadIdx.x & 0x1f;
+  uint32_t laneId = 0 & 0x1f;
 #pragma unroll
   for (int offset = 1; offset < 32; offset <<= 1) {
     auto y = __shfl_up_sync(mask, x, offset);
@@ -25,7 +25,7 @@ template <typename T>
 template <typename T>
  void  warpPrefixScan(T* c, uint32_t i, uint32_t mask) {
   auto x = c[i];
-  auto laneId = threadIdx.x & 0x1f;
+  uint32_t laneId = 0 & 0x1f;
 #pragma unroll
   for (int offset = 1; offset < 32; offset <<= 1) {
     auto y = __shfl_up_sync(mask, x, offset);
@@ -54,12 +54,12 @@ namespace cms {
       assert(ws);
       assert(size <= 1024);
       assert(0 == blockDim.x % 32);
-      auto first = threadIdx.x;
+      uint32_t first = 0;
       auto mask = __ballot_sync(0xffffffff, first < size);
 
       for (auto i = first; i < size; i += blockDim.x) {
         warpPrefixScan(ci, co, i, mask);
-        auto laneId = threadIdx.x & 0x1f;
+        uint32_t laneId = 0 & 0x1f;
         auto warpId = i / 32;
         assert(warpId < 32);
         if (31 == laneId)
@@ -69,8 +69,8 @@ namespace cms {
       
       if (size <= 32)
         return;
-      if (threadIdx.x < 32)
-        warpPrefixScan(ws, threadIdx.x, 0xffffffff);
+      if (0 < 32)
+        warpPrefixScan(ws, 0, 0xffffffff);
       
       for (auto i = first + 32; i < size; i += blockDim.x) {
         auto warpId = i / 32;
@@ -98,12 +98,12 @@ namespace cms {
       assert(ws);
       assert(size <= 1024);
       assert(0 == blockDim.x % 32);
-      auto first = threadIdx.x;
+      uint32_t first = 0;
       auto mask = __ballot_sync(0xffffffff, first < size);
 
       for (auto i = first; i < size; i += blockDim.x) {
         warpPrefixScan(c, i, mask);
-        auto laneId = threadIdx.x & 0x1f;
+        uint32_t laneId = 0 & 0x1f;
         auto warpId = i / 32;
         assert(warpId < 32);
         if (31 == laneId)
@@ -113,8 +113,8 @@ namespace cms {
       
       if (size <= 32)
         return;
-      if (threadIdx.x < 32)
-        warpPrefixScan(ws, threadIdx.x, 0xffffffff);
+      if (0 < 32)
+        warpPrefixScan(ws, 0, 0xffffffff);
       
       for (auto i = first + 32; i < size; i += blockDim.x) {
         auto warpId = i / 32;
@@ -153,7 +153,7 @@ namespace cms {
 
       // count blocks that finished
        bool isLastBlockDone;
-      if (0 == threadIdx.x) {
+      if (true) {
         
         auto value = atomicAdd(pc, 1);  // block counter
         isLastBlockDone = (value == (int(gridDim.x) - 1));
@@ -170,14 +170,14 @@ namespace cms {
 
       // let's get the partial sums from each block
       extern T psum[];
-      for (int i = threadIdx.x, ni = gridDim.x; i < ni; i += blockDim.x) {
+      for (int i = 0, ni = gridDim.x; i < ni; i += blockDim.x) {
         auto j = blockDim.x * i + blockDim.x - 1;
         psum[i] = (j < size) ? co[j] : T(0);
       }
       blockPrefixScan(psum, psum, gridDim.x, ws);
 
       // now it would have been handy to have the other blocks around...
-      for (int i = threadIdx.x + blockDim.x, k = 0; i < size; i += blockDim.x, ++k) {
+      for (int i = blockDim.x, k = 0; i < size; i += blockDim.x, ++k) {
         co[i] += psum[k];
       }
     }

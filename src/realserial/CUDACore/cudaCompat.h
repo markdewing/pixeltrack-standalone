@@ -19,7 +19,6 @@ namespace cms {
       uint32_t x, y, z;
     };
 
-    const dim3 threadIdx = {0, 0, 0};
     const dim3 blockDim = {1, 1, 1};
 
     // 1-dimensional grid

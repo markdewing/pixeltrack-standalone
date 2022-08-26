@@ -19,33 +19,33 @@ using Multiplicity = cms::cuda::OneToManyAssoc<uint16_t, 8, MaxTk>;
 using TK = std::array<uint16_t, 4>;
 
  void countMultiLocal(TK const* __restrict__ tk, Multiplicity* __restrict__ assoc, int32_t n) {
-  int first = blockDim.x * blockIdx.x + threadIdx.x;
+  int first = blockDim.x * blockIdx.x + 0;
   for (int i = first; i < n; i += gridDim.x * blockDim.x) {
      Multiplicity::CountersOnly local;
-    if (threadIdx.x == 0)
+    if (true)
       local.zero();
     
     local.countDirect(2 + i % 4);
     
-    if (threadIdx.x == 0)
+    if (true)
       assoc->add(local);
   }
 }
 
  void countMulti(TK const* __restrict__ tk, Multiplicity* __restrict__ assoc, int32_t n) {
-  int first = blockDim.x * blockIdx.x + threadIdx.x;
+  int first = blockDim.x * blockIdx.x + 0;
   for (int i = first; i < n; i += gridDim.x * blockDim.x)
     assoc->countDirect(2 + i % 4);
 }
 
  void verifyMulti(Multiplicity* __restrict__ m1, Multiplicity* __restrict__ m2) {
-  auto first = blockDim.x * blockIdx.x + threadIdx.x;
+  auto first = blockDim.x * blockIdx.x + 0;
   for (auto i = first; i < Multiplicity::totbins(); i += gridDim.x * blockDim.x)
     assert(m1->off[i] == m2->off[i]);
 }
 
  void count(TK const* __restrict__ tk, Assoc* __restrict__ assoc, int32_t n) {
-  int first = blockDim.x * blockIdx.x + threadIdx.x;
+  int first = blockDim.x * blockIdx.x + 0;
   for (int i = first; i < 4 * n; i += gridDim.x * blockDim.x) {
     auto k = i / 4;
     auto j = i - 4 * k;
@@ -58,7 +58,7 @@ using TK = std::array<uint16_t, 4>;
 }
 
  void fill(TK const* __restrict__ tk, Assoc* __restrict__ assoc, int32_t n) {
-  int first = blockDim.x * blockIdx.x + threadIdx.x;
+  int first = blockDim.x * blockIdx.x + 0;
   for (int i = first; i < 4 * n; i += gridDim.x * blockDim.x) {
     auto k = i / 4;
     auto j = i - 4 * k;
@@ -74,7 +74,7 @@ using TK = std::array<uint16_t, 4>;
 
 template <typename Assoc>
  void fillBulk(AtomicPairCounter* apc, TK const* __restrict__ tk, Assoc* __restrict__ assoc, int32_t n) {
-  int first = blockDim.x * blockIdx.x + threadIdx.x;
+  int first = blockDim.x * blockIdx.x + 0;
   for (int k = first; k < n; k += gridDim.x * blockDim.x) {
     auto m = tk[k][3] < MaxElem ? 4 : 3;
     assoc->bulkFill(*apc, &tk[k][0], m);
@@ -89,23 +89,6 @@ template <typename Assoc>
 }
 
 int main() {
-  // make sure cuda emulation is working
-  std::cout << "cuda x's " << threadIdx.x << ' ' << blockIdx.x << ' ' << blockDim.x << ' ' << gridDim.x << std::endl;
-  std::cout << "cuda y's " << threadIdx.y << ' ' << blockIdx.y << ' ' << blockDim.y << ' ' << gridDim.y << std::endl;
-  std::cout << "cuda z's " << threadIdx.z << ' ' << blockIdx.z << ' ' << blockDim.z << ' ' << gridDim.z << std::endl;
-  assert(threadIdx.x == 0);
-  assert(threadIdx.y == 0);
-  assert(threadIdx.z == 0);
-  assert(blockIdx.x == 0);
-  assert(blockIdx.y == 0);
-  assert(blockIdx.z == 0);
-  assert(blockDim.x == 1);
-  assert(blockDim.y == 1);
-  assert(blockDim.z == 1);
-  assert(gridDim.x == 1);
-  assert(gridDim.y == 1);
-  assert(gridDim.z == 1);
-
   std::cout << "OneToManyAssoc " << sizeof(Assoc) << ' ' << Assoc::nbins() << ' ' << Assoc::capacity() << std::endl;
   std::cout << "OneToManyAssoc (small) " << sizeof(SmallAssoc) << ' ' << SmallAssoc::nbins() << ' '
             << SmallAssoc::capacity() << std::endl;

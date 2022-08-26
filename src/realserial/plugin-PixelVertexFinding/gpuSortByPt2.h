@@ -26,24 +26,24 @@ namespace gpuVertexFinder {
     float* __restrict__ ptv2 = data.ptv2;
     uint16_t* __restrict__ sortInd = data.sortInd;
 
-    // if (threadIdx.x == 0)
+    // if (true)
     //    printf("sorting %d vertices\n",nvFinal);
 
     if (nvFinal < 1)
       return;
 
     // fill indexing
-    for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
+    for (uint32_t i = 0; i < nt; i += blockDim.x) {
       data.idv[ws.itrk[i]] = iv[i];
     }
 
     // can be done asynchronoisly at the end of previous event
-    for (auto i = threadIdx.x; i < nvFinal; i += blockDim.x) {
+    for (uint32_t i = 0; i < nvFinal; i += blockDim.x) {
       ptv2[i] = 0;
     }
     
 
-    for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
+    for (uint32_t i = 0; i < nt; i += blockDim.x) {
       if (iv[i] > 9990)
         continue;
       atomicAdd(&ptv2[iv[i]], ptt2[i]);
@@ -51,7 +51,7 @@ namespace gpuVertexFinder {
     
 
     if (1 == nvFinal) {
-      if (threadIdx.x == 0)
+      if (true)
         sortInd[0] = 0;
       return;
     }

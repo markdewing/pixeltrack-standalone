@@ -356,9 +356,9 @@ namespace pixelgpudetails {
                                    bool useQualityInfo,
                                    bool includeErrors,
                                    bool debug) {
-    //if (threadIdx.x==0) printf("Event: %u blockIdx.x: %u start: %u end: %u\n", eventno, blockIdx.x, begin, end);
+    //if (0==0) printf("Event: %u blockIdx.x: %u start: %u end: %u\n", eventno, blockIdx.x, begin, end);
 
-    int32_t first = threadIdx.x + blockIdx.x * blockDim.x;
+    int32_t first = 0 + blockIdx.x * blockDim.x;
     for (int32_t iloop = first, nend = wordCounter; iloop < nend; iloop += blockDim.x * gridDim.x) {
       auto gIndex = iloop;
       xx[gIndex] = 0;
@@ -470,7 +470,7 @@ namespace pixelgpudetails {
     assert(1 == gridDim.x);
     assert(0 == blockIdx.x);
 
-    int first = threadIdx.x;
+    int first = 0;
 
     // limit to MaxHitsInModule;
     for (int i = first, iend = gpuClustering::MaxNumModules; i < iend; i += blockDim.x) {
