@@ -21,9 +21,6 @@ namespace cms {
 
     const dim3 blockDim = {1, 1, 1};
 
-    // 1-dimensional grid
-    const dim3 blockIdx = {0, 0, 0};
-
     template <typename T1, typename T2>
     T1 atomicCAS(T1* address, T1 compare, T2 val) {
       T1 old = *address;

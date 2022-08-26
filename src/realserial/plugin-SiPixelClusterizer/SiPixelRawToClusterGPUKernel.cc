@@ -356,7 +356,6 @@ namespace pixelgpudetails {
                                    bool useQualityInfo,
                                    bool includeErrors,
                                    bool debug) {
-    //if (0==0) printf("Event: %u blockIdx.x: %u start: %u end: %u\n", eventno, 0, begin, end);
 
     int32_t first = 0;
     for (int32_t iloop = first, nend = wordCounter; iloop < nend; iloop += blockDim.x) {
