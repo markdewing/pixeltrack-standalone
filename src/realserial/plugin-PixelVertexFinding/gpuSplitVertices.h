@@ -32,7 +32,7 @@ namespace gpuVertexFinder {
     assert(zt);
 
     // one vertex per block
-    for (auto kv = blockIdx.x; kv < nvFinal; kv += gridDim.x) {
+    for (auto kv = blockIdx.x; kv < nvFinal; kv += 1) {
       if (nn[kv] < 4)
         continue;
       if (chi2[kv] < maxChi2 * float(nn[kv]))

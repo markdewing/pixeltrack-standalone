@@ -63,7 +63,7 @@ namespace gpuPixelRecHits {
 
     auto firstModule = blockIdx.x;
     auto endModule = clusters.moduleStart(0);
-    for (auto module = firstModule; module < endModule; module += gridDim.x) {
+    for (auto module = firstModule; module < endModule; module += 1) {
       auto me = clusters.moduleId(module);
       int nclus = clusters.clusInModule(me);
 

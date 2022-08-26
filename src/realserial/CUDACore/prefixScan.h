@@ -143,9 +143,9 @@ namespace cms {
       volatile T* co = ico;
        T ws[32];
 #ifdef __CUDA_ARCH__
-      assert(sizeof(T) * gridDim.x <= dynamic_smem_size());  // size of psum below
+      assert(sizeof(T) <= dynamic_smem_size());  // size of psum below
 #endif
-      assert(blockDim.x * gridDim.x >= size);
+      assert(blockDim.x >= size);
       // first each block does a scan
       int off = blockDim.x * blockIdx.x;
       if (size - off > 0)
@@ -156,7 +156,7 @@ namespace cms {
       if (true) {
         
         auto value = atomicAdd(pc, 1);  // block counter
-        isLastBlockDone = (value == (int(gridDim.x) - 1));
+        isLastBlockDone = (value == (int(1) - 1));
       }
 
       
@@ -164,17 +164,17 @@ namespace cms {
       if (!isLastBlockDone)
         return;
 
-      assert(int(gridDim.x) == *pc);
+      assert(int(1) == *pc);
 
       // good each block has done its work and now we are left in last block
 
       // let's get the partial sums from each block
       extern T psum[];
-      for (int i = 0, ni = gridDim.x; i < ni; i += blockDim.x) {
+      for (int i = 0, ni = 1; i < ni; i += blockDim.x) {
         auto j = blockDim.x * i + blockDim.x - 1;
         psum[i] = (j < size) ? co[j] : T(0);
       }
-      blockPrefixScan(psum, psum, gridDim.x, ws);
+      blockPrefixScan(psum, psum, 1, ws);
 
       // now it would have been handy to have the other blocks around...
       for (int i = blockDim.x, k = 0; i < size; i += blockDim.x, ++k) {

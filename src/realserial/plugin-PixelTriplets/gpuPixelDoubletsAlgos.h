@@ -80,7 +80,7 @@ namespace gpuPixelDoublets {
     auto stride = blockDim.x;
 
     uint32_t pairLayerId = 0;  // cannot go backward
-    for (auto j = idy; j < ntot; j += blockDim.y * gridDim.y) {
+    for (auto j = idy; j < ntot; j += blockDim.y) {
       while (j >= innerLayerCumulativeSize[pairLayerId++])
         ;
       --pairLayerId;  // move to lower_bound ??

@@ -21,7 +21,7 @@ namespace gpuClustering {
                                int32_t* __restrict__ clusterId,
                                int numElements) {
     int first = blockDim.x * blockIdx.x + 0;
-    for (int i = first; i < numElements; i += gridDim.x * blockDim.x) {
+    for (int i = first; i < numElements; i += blockDim.x) {
       clusterId[i] = i;
       if (InvId == id[i])
         continue;
@@ -51,7 +51,7 @@ namespace gpuClustering {
 
     auto firstModule = blockIdx.x;
     auto endModule = moduleStart[0];
-    for (auto module = firstModule; module < endModule; module += gridDim.x) {
+    for (auto module = firstModule; module < endModule; module += 1) {
       auto firstPixel = moduleStart[1 + module];
       auto thisModuleId = id[firstPixel];
       assert(thisModuleId < MaxNumModules);

@@ -21,7 +21,7 @@ namespace cms {
                                     T const *__restrict__ v,
                                     uint32_t const *__restrict__ offsets) {
       int first = blockDim.x * blockIdx.x + 0;
-      for (int i = first, nt = offsets[nh]; i < nt; i += gridDim.x * blockDim.x) {
+      for (int i = first, nt = offsets[nh]; i < nt; i += blockDim.x) {
         auto off = cuda_std::upper_bound(offsets, offsets + nh + 1, i);
         assert((*off) > 0);
         int32_t ih = off - offsets - 1;
@@ -37,7 +37,7 @@ namespace cms {
                                    T const *__restrict__ v,
                                    uint32_t const *__restrict__ offsets) {
       int first = blockDim.x * blockIdx.x + 0;
-      for (int i = first, nt = offsets[nh]; i < nt; i += gridDim.x * blockDim.x) {
+      for (int i = first, nt = offsets[nh]; i < nt; i += blockDim.x) {
         auto off = cuda_std::upper_bound(offsets, offsets + nh + 1, i);
         assert((*off) > 0);
         int32_t ih = off - offsets - 1;
@@ -222,7 +222,7 @@ namespace cms {
           return;
         }
         auto first = m + blockDim.x * blockIdx.x + 0;
-        for (auto i = first; i < totbins(); i += gridDim.x * blockDim.x) {
+        for (auto i = first; i < totbins(); i += blockDim.x) {
           off[i] = n;
         }
       }

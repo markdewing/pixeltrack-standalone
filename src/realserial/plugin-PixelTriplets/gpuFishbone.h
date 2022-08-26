@@ -35,7 +35,7 @@ namespace gpuPixelDoublets {
     uint16_t d[maxCellsPerHit];  // uint8_t l[maxCellsPerHit];
     uint32_t cc[maxCellsPerHit];
 
-    for (int idy = firstY, nt = nHits; idy < nt; idy += gridDim.y * blockDim.y) {
+    for (int idy = firstY, nt = nHits; idy < nt; idy += blockDim.y) {
       auto const& vc = isOuterHitOfCell[idy];
       auto s = vc.size();
       if (s < 2)
