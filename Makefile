@@ -269,6 +269,33 @@ DPCT_CXXFLAGS := -isystem $(DPCT_BASE)/include
 endif
 SYCL_UNSUPPORTED_CXXFLAGS := --param vect-max-version-for-alias-checks=50 -Wno-non-template-friend -Werror=format-contains-nul -Werror=return-local-addr -Werror=unused-but-set-variable
 
+# OpenMP target offload
+
+OPENMP_COMPILER := LLVM
+#OPENMP_COMPILER := AMD
+#OPENMP_COMPILER := INTEL
+#OPENMP_COMPILER := NVIDIA
+
+ifeq ($(OPENMP_COMPILER), LLVM)
+  export OPENMP_CXX := clang++
+  # CUDA
+  #export OPENMP_TARGETS := -fopenmp-targets=nvptx64-nvidia-cuda --cuda-path=$(CUDA_BASE)
+  # HIP
+  export OPENMP_TARGETS := -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdhsa-amd-amdhsa  -march=gfx900
+  export OPENMP_CXXFLAGS := -fPIC -fopenmp $(OPENMP_TARGETS) -fopenmp-offload-mandatory
+else ifeq ($(OPENMP_COMPILER), AMD)
+  echo "aompcc not supported"
+  # aompcc doesn't support C++ files with .cc suffix
+  #export OPENMP_CXX := aompcc
+else ifeq ($(OPENMP_COMPILER), INTEL)
+  export OPENMP_CXX := icpx
+  export OPENMP_CXX_FLAGS := -fiopenmp -fopenmp-targets=spir64
+else ifeq ($(OPENMP_COMPILER), NVIDIA)
+  export OPENMP_CXX := nvc++
+  export OPENMP_CXX_FLAGS := -mp=gpu
+endif
+
+
 # to use a different toolchain
 #   - unset ONEAPI_ENV
 #   - set SYCL_BASE appropriately
