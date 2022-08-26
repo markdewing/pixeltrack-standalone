@@ -17,7 +17,7 @@ namespace gpuVertexFinder {
   //
   // based on Rodrighez&Laio algo
   //
-  __device__ __forceinline__ void clusterTracksByDensity(gpuVertexFinder::ZVertices* pdata,
+  void clusterTracksByDensity(gpuVertexFinder::ZVertices* pdata,
                                                          gpuVertexFinder::WorkSpace* pws,
                                                          int minT,      // min number of neighbours to be "seed"
                                                          float eps,     // max absolute distance to cluster
@@ -49,8 +49,8 @@ namespace gpuVertexFinder {
     assert(zt);
 
     using Hist = cms::cuda::HistoContainer<uint8_t, 256, 16000, 8, uint16_t>;
-    __shared__ Hist hist;
-    __shared__ typename Hist::Counter hws[32];
+     Hist hist;
+     typename Hist::Counter hws[32];
     for (auto j = threadIdx.x; j < Hist::totbins(); j += blockDim.x) {
       hist.off[j] = 0;
     }
@@ -179,7 +179,7 @@ namespace gpuVertexFinder {
     __syncthreads();
 #endif
 
-    __shared__ unsigned int foundClusters;
+     unsigned int foundClusters;
     foundClusters = 0;
     __syncthreads();
 
@@ -219,7 +219,7 @@ namespace gpuVertexFinder {
       printf("found %d proto vertices\n", foundClusters);
   }
 
-  __global__ void clusterTracksByDensityKernel(gpuVertexFinder::ZVertices* pdata,
+   void clusterTracksByDensityKernel(gpuVertexFinder::ZVertices* pdata,
                                                gpuVertexFinder::WorkSpace* pws,
                                                int minT,      // min number of neighbours to be "seed"
                                                float eps,     // max absolute distance to cluster

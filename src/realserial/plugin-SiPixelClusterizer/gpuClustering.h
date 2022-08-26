@@ -13,10 +13,10 @@
 namespace gpuClustering {
 
 #ifdef GPU_DEBUG
-  __device__ uint32_t gMaxHit = 0;
+  uint32_t gMaxHit = 0;
 #endif
 
-  __global__ void countModules(uint16_t const* __restrict__ id,
+   void countModules(uint16_t const* __restrict__ id,
                                uint32_t* __restrict__ moduleStart,
                                int32_t* __restrict__ clusterId,
                                int numElements) {
@@ -36,7 +36,7 @@ namespace gpuClustering {
     }
   }
 
-  __global__
+  
       //  __launch_bounds__(256,4)
       void
       findClus(uint16_t const* __restrict__ id,           // module id of each pixel
@@ -47,7 +47,7 @@ namespace gpuClustering {
                uint32_t* __restrict__ moduleId,           // output: module id of each module
                int32_t* __restrict__ clusterId,           // output: cluster id of each pixel
                int numElements) {
-    __shared__ int msize;
+     int msize;
 
     auto firstModule = blockIdx.x;
     auto endModule = moduleStart[0];
@@ -82,8 +82,8 @@ namespace gpuClustering {
       constexpr uint32_t maxPixInModule = 4000;
       constexpr auto nbins = phase1PixelTopology::numColsInModule + 2;  //2+2;
       using Hist = cms::cuda::HistoContainer<uint16_t, nbins, maxPixInModule, 9, uint16_t>;
-      __shared__ Hist hist;
-      __shared__ typename Hist::Counter ws[32];
+       Hist hist;
+       typename Hist::Counter ws[32];
       for (auto j = threadIdx.x; j < Hist::totbins(); j += blockDim.x) {
         hist.off[j] = 0;
       }
@@ -103,7 +103,7 @@ namespace gpuClustering {
       assert(msize - firstPixel <= maxPixInModule);
 
 #ifdef GPU_DEBUG
-      __shared__ uint32_t totGood;
+       uint32_t totGood;
       totGood = 0;
       __syncthreads();
 #endif
@@ -154,7 +154,7 @@ namespace gpuClustering {
 
 #ifdef GPU_DEBUG
       // look for anomalous high occupancy
-      __shared__ uint32_t n40, n60;
+       uint32_t n40, n60;
       n40 = n60 = 0;
       __syncthreads();
       for (auto j = threadIdx.x; j < Hist::nbins(); j += blockDim.x) {
@@ -236,7 +236,7 @@ namespace gpuClustering {
 
 #ifdef GPU_DEBUG
       {
-        __shared__ int n0;
+         int n0;
         if (threadIdx.x == 0)
           n0 = nloops;
         __syncthreads();
@@ -248,7 +248,7 @@ namespace gpuClustering {
       }
 #endif
 
-      __shared__ unsigned int foundClusters;
+       unsigned int foundClusters;
       foundClusters = 0;
       __syncthreads();
 

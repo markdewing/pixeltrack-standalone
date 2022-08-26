@@ -15,7 +15,7 @@
 
 namespace gpuVertexFinder {
 
-  __device__ __forceinline__ void sortByPt2(ZVertices* pdata, WorkSpace* pws) {
+    void sortByPt2(ZVertices* pdata, WorkSpace* pws) {
     auto& __restrict__ data = *pdata;
     auto& __restrict__ ws = *pws;
     auto nt = ws.ntrks;
@@ -56,7 +56,7 @@ namespace gpuVertexFinder {
       return;
     }
 #ifdef __CUDA_ARCH__
-    __shared__ uint16_t sws[1024];
+     uint16_t sws[1024];
     // sort using only 16 bits
     radixSort<float, 2>(ptv2, sortInd, sws, nvFinal);
 #else
@@ -66,7 +66,7 @@ namespace gpuVertexFinder {
 #endif
   }
 
-  __global__ void sortByPt2Kernel(ZVertices* pdata, WorkSpace* pws) { sortByPt2(pdata, pws); }
+   void sortByPt2Kernel(ZVertices* pdata, WorkSpace* pws) { sortByPt2(pdata, pws); }
 
 }  // namespace gpuVertexFinder
 

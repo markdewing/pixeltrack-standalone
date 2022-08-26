@@ -7,7 +7,7 @@
 
 namespace gpuVertexFinder {
 
-  __global__ void loadTracks(TkSoA const* ptracks, ZVertexSoA* soa, WorkSpace* pws, float ptMin) {
+   void loadTracks(TkSoA const* ptracks, ZVertexSoA* soa, WorkSpace* pws, float ptMin) {
     assert(ptracks);
     assert(soa);
     auto const& tracks = *ptracks;
@@ -44,7 +44,7 @@ namespace gpuVertexFinder {
 
 // #define THREE_KERNELS
 #ifndef THREE_KERNELS
-  __global__ void vertexFinderOneKernel(gpuVertexFinder::ZVertices* pdata,
+   void vertexFinderOneKernel(gpuVertexFinder::ZVertices* pdata,
                                         gpuVertexFinder::WorkSpace* pws,
                                         int minT,      // min number of neighbours to be "seed"
                                         float eps,     // max absolute distance to cluster
@@ -62,7 +62,7 @@ namespace gpuVertexFinder {
     sortByPt2(pdata, pws);
   }
 #else
-  __global__ void vertexFinderKernel1(gpuVertexFinder::ZVertices* pdata,
+   void vertexFinderKernel1(gpuVertexFinder::ZVertices* pdata,
                                       gpuVertexFinder::WorkSpace* pws,
                                       int minT,      // min number of neighbours to be "seed"
                                       float eps,     // max absolute distance to cluster
@@ -74,7 +74,7 @@ namespace gpuVertexFinder {
     fitVertices(pdata, pws, 50.);
   }
 
-  __global__ void vertexFinderKernel2(gpuVertexFinder::ZVertices* pdata, gpuVertexFinder::WorkSpace* pws) {
+   void vertexFinderKernel2(gpuVertexFinder::ZVertices* pdata, gpuVertexFinder::WorkSpace* pws) {
     fitVertices(pdata, pws, 5000.);
     __syncthreads();
     sortByPt2(pdata, pws);

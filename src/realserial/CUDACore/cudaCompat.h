@@ -10,15 +10,6 @@
 #include <cstdint>
 #include <cstring>
 
-// make sure function are inlined to avoid multiple definition
-#define __global__ inline __attribute__((always_inline))
-
-#define __forceinline__ inline __attribute__((always_inline))
-
-#define __host__
-#define __device__
-#define __shared__
-
 using cudaStream_t = void*;
 constexpr cudaStream_t cudaStreamDefault = nullptr;
 

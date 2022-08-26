@@ -5,10 +5,6 @@
 #include <cstdio>
 #include <tuple>
 
-// including <cuda_runtime.h> would pull in the dependency on all of CUDA;
-// instead, just define away the CUDA specific attributes to keep GCC happy.
-#define __host__
-#define __device__
 
 #include "CUDACore/cuda_assert.h"
 
@@ -24,7 +20,7 @@ public:
 
   using Range = std::pair<uint32_t, uint32_t>;
 
-  inline __host__ __device__ std::pair<float, float> getPedAndGain(
+  inline std::pair<float, float> getPedAndGain(
       uint32_t moduleInd, int col, int row, bool& isDeadColumn, bool& isNoisyColumn) const {
     auto range = rangeAndCols[moduleInd].first;
     auto nCols = rangeAndCols[moduleInd].second;

@@ -25,7 +25,7 @@ using Quality = pixelTrack::Quality;
 using TkSoA = pixelTrack::TrackSoA;
 using HitContainer = pixelTrack::HitContainer;
 
-__global__ void kernel_checkOverflows(HitContainer const *foundNtuplets,
+ void kernel_checkOverflows(HitContainer const *foundNtuplets,
                                       CAConstants::TupleMultiplicity *tupleMultiplicity,
                                       cms::cuda::AtomicPairCounter *apc,
                                       GPUCACell const *__restrict__ cells,
@@ -101,7 +101,7 @@ __global__ void kernel_checkOverflows(HitContainer const *foundNtuplets,
   }
 }
 
-__global__ void kernel_fishboneCleaner(GPUCACell const *cells, uint32_t const *__restrict__ nCells, Quality *quality) {
+ void kernel_fishboneCleaner(GPUCACell const *cells, uint32_t const *__restrict__ nCells, Quality *quality) {
   constexpr auto bad = trackQuality::bad;
 
   auto first = threadIdx.x + blockIdx.x * blockDim.x;
@@ -115,7 +115,7 @@ __global__ void kernel_fishboneCleaner(GPUCACell const *cells, uint32_t const *_
   }
 }
 
-__global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
+ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
                                              uint32_t const *__restrict__ nCells,
                                              HitContainer *foundNtuplets,
                                              Quality *quality) {
@@ -148,7 +148,7 @@ __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
   }
 }
 
-__global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
+ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
                                             uint32_t const *__restrict__ nCells,
                                             HitContainer const *__restrict__ foundNtuplets,
                                             TkSoA *__restrict__ tracks) {
@@ -188,7 +188,7 @@ __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
   }
 }
 
-__global__ void kernel_connect(cms::cuda::AtomicPairCounter *apc1,
+ void kernel_connect(cms::cuda::AtomicPairCounter *apc1,
                                cms::cuda::AtomicPairCounter *apc2,  // just to zero them,
                                GPUCACell::Hits const *__restrict__ hhp,
                                GPUCACell *cells,
@@ -261,7 +261,7 @@ __global__ void kernel_connect(cms::cuda::AtomicPairCounter *apc1,
   }    // loop on outer cells
 }
 
-__global__ void kernel_find_ntuplets(GPUCACell::Hits const *__restrict__ hhp,
+ void kernel_find_ntuplets(GPUCACell::Hits const *__restrict__ hhp,
                                      GPUCACell *__restrict__ cells,
                                      uint32_t const *nCells,
                                      gpuPixelDoublets::CellTracksVector *cellTracks,
@@ -291,7 +291,7 @@ __global__ void kernel_find_ntuplets(GPUCACell::Hits const *__restrict__ hhp,
   }
 }
 
-__global__ void kernel_mark_used(GPUCACell::Hits const *__restrict__ hhp,
+ void kernel_mark_used(GPUCACell::Hits const *__restrict__ hhp,
                                  GPUCACell *__restrict__ cells,
                                  uint32_t const *nCells) {
   // auto const &hh = *hhp;
@@ -303,7 +303,7 @@ __global__ void kernel_mark_used(GPUCACell::Hits const *__restrict__ hhp,
   }
 }
 
-__global__ void kernel_countMultiplicity(HitContainer const *__restrict__ foundNtuplets,
+ void kernel_countMultiplicity(HitContainer const *__restrict__ foundNtuplets,
                                          Quality const *__restrict__ quality,
                                          CAConstants::TupleMultiplicity *tupleMultiplicity) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
@@ -321,7 +321,7 @@ __global__ void kernel_countMultiplicity(HitContainer const *__restrict__ foundN
   }
 }
 
-__global__ void kernel_fillMultiplicity(HitContainer const *__restrict__ foundNtuplets,
+ void kernel_fillMultiplicity(HitContainer const *__restrict__ foundNtuplets,
                                         Quality const *__restrict__ quality,
                                         CAConstants::TupleMultiplicity *tupleMultiplicity) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
@@ -339,7 +339,7 @@ __global__ void kernel_fillMultiplicity(HitContainer const *__restrict__ foundNt
   }
 }
 
-__global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
+ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
                                       TkSoA const *__restrict__ tracks,
                                       CAHitNtupletGeneratorKernelsCPU::QualityCuts cuts,
                                       Quality *__restrict__ quality) {
@@ -407,7 +407,7 @@ __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
   }
 }
 
-__global__ void kernel_doStatsForTracks(HitContainer const *__restrict__ tuples,
+ void kernel_doStatsForTracks(HitContainer const *__restrict__ tuples,
                                         Quality const *__restrict__ quality,
                                         CAHitNtupletGeneratorKernelsCPU::Counters *counters) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
@@ -420,7 +420,7 @@ __global__ void kernel_doStatsForTracks(HitContainer const *__restrict__ tuples,
   }
 }
 
-__global__ void kernel_countHitInTracks(HitContainer const *__restrict__ tuples,
+ void kernel_countHitInTracks(HitContainer const *__restrict__ tuples,
                                         Quality const *__restrict__ quality,
                                         CAHitNtupletGeneratorKernelsCPU::HitToTuple *hitToTuple) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
@@ -434,7 +434,7 @@ __global__ void kernel_countHitInTracks(HitContainer const *__restrict__ tuples,
   }
 }
 
-__global__ void kernel_fillHitInTracks(HitContainer const *__restrict__ tuples,
+ void kernel_fillHitInTracks(HitContainer const *__restrict__ tuples,
                                        Quality const *__restrict__ quality,
                                        CAHitNtupletGeneratorKernelsCPU::HitToTuple *hitToTuple) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
@@ -448,7 +448,7 @@ __global__ void kernel_fillHitInTracks(HitContainer const *__restrict__ tuples,
   }
 }
 
-__global__ void kernel_fillHitDetIndices(HitContainer const *__restrict__ tuples,
+ void kernel_fillHitDetIndices(HitContainer const *__restrict__ tuples,
                                          TrackingRecHit2DSOAView const *__restrict__ hhp,
                                          HitContainer *__restrict__ hitDetIndices) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
@@ -465,7 +465,7 @@ __global__ void kernel_fillHitDetIndices(HitContainer const *__restrict__ tuples
   }
 }
 
-__global__ void kernel_doStatsForHitInTracks(CAHitNtupletGeneratorKernelsCPU::HitToTuple const *__restrict__ hitToTuple,
+ void kernel_doStatsForHitInTracks(CAHitNtupletGeneratorKernelsCPU::HitToTuple const *__restrict__ hitToTuple,
                                              CAHitNtupletGeneratorKernelsCPU::Counters *counters) {
   auto &c = *counters;
   int first = blockDim.x * blockIdx.x + threadIdx.x;
@@ -478,7 +478,7 @@ __global__ void kernel_doStatsForHitInTracks(CAHitNtupletGeneratorKernelsCPU::Hi
   }
 }
 
-__global__ void kernel_tripletCleaner(TrackingRecHit2DSOAView const *__restrict__ hhp,
+ void kernel_tripletCleaner(TrackingRecHit2DSOAView const *__restrict__ hhp,
                                       HitContainer const *__restrict__ ptuples,
                                       TkSoA const *__restrict__ ptracks,
                                       Quality *__restrict__ quality,
@@ -535,7 +535,7 @@ __global__ void kernel_tripletCleaner(TrackingRecHit2DSOAView const *__restrict_
   }  // loop over hits
 }
 
-__global__ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__restrict__ hhp,
+ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__restrict__ hhp,
                                             HitContainer const *__restrict__ ptuples,
                                             TkSoA const *__restrict__ ptracks,
                                             Quality const *__restrict__ quality,
@@ -569,7 +569,7 @@ __global__ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__res
   }
 }
 
-__global__ void kernel_printCounters(cAHitNtupletGenerator::Counters const *counters) {
+ void kernel_printCounters(cAHitNtupletGenerator::Counters const *counters) {
   auto const &c = *counters;
   printf(
       "||Counters | nEvents | nHits | nCells | nTuples | nFitTacks  |  nGoodTracks | nUsedHits | nDupHits | "

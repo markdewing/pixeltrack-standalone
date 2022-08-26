@@ -9,7 +9,7 @@
 #ifdef __CUDA_ARCH__
 
 template <typename T>
-__device__ void __forceinline__ warpPrefixScan(T const* __restrict__ ci, T* __restrict__ co, uint32_t i, uint32_t mask) {
+ void  warpPrefixScan(T const* __restrict__ ci, T* __restrict__ co, uint32_t i, uint32_t mask) {
   // ci and co may be the same
   auto x = ci[i];
   auto laneId = threadIdx.x & 0x1f;
@@ -23,7 +23,7 @@ __device__ void __forceinline__ warpPrefixScan(T const* __restrict__ ci, T* __re
 }
 
 template <typename T>
-__device__ void __forceinline__ warpPrefixScan(T* c, uint32_t i, uint32_t mask) {
+ void  warpPrefixScan(T* c, uint32_t i, uint32_t mask) {
   auto x = c[i];
   auto laneId = threadIdx.x & 0x1f;
 #pragma unroll
@@ -42,7 +42,7 @@ namespace cms {
 
     // limited to 32*32 elements....
     template <typename VT, typename T>
-    __host__ __device__ __forceinline__ void blockPrefixScan(VT const* ci,
+    void blockPrefixScan(VT const* ci,
                                                              VT* co,
                                                              uint32_t size,
                                                              T* ws
@@ -87,7 +87,7 @@ namespace cms {
     // same as above, may remove
     // limited to 32*32 elements....
     template <typename T>
-    __host__ __device__ __forceinline__ void blockPrefixScan(T* c,
+    void blockPrefixScan(T* c,
                                                              uint32_t size,
                                                              T* ws
 #ifndef __CUDA_ARCH__
@@ -129,7 +129,7 @@ namespace cms {
 
 #ifdef __CUDA_ARCH__
     // see https://stackoverflow.com/questions/40021086/can-i-obtain-the-amount-of-allocated-dynamic-shared-memory-from-within-a-kernel/40021087#40021087
-    __device__ __forceinline__ unsigned dynamic_smem_size() {
+      unsigned dynamic_smem_size() {
       unsigned ret;
       asm volatile("mov.u32 %0, %dynamic_smem_size;" : "=r"(ret));
       return ret;
@@ -138,10 +138,10 @@ namespace cms {
 
     // in principle not limited....
     template <typename T>
-    __global__ void multiBlockPrefixScan(T const* ici, T* ico, int32_t size, int32_t* pc) {
+     void multiBlockPrefixScan(T const* ici, T* ico, int32_t size, int32_t* pc) {
       volatile T const* ci = ici;
       volatile T* co = ico;
-      __shared__ T ws[32];
+       T ws[32];
 #ifdef __CUDA_ARCH__
       assert(sizeof(T) * gridDim.x <= dynamic_smem_size());  // size of psum below
 #endif
@@ -152,7 +152,7 @@ namespace cms {
         blockPrefixScan(ci + off, co + off, std::min(int(blockDim.x), size - off), ws);
 
       // count blocks that finished
-      __shared__ bool isLastBlockDone;
+       bool isLastBlockDone;
       if (0 == threadIdx.x) {
         __threadfence();
         auto value = atomicAdd(pc, 1);  // block counter
@@ -169,7 +169,7 @@ namespace cms {
       // good each block has done its work and now we are left in last block
 
       // let's get the partial sums from each block
-      extern __shared__ T psum[];
+      extern T psum[];
       for (int i = threadIdx.x, ni = gridDim.x; i < ni; i += blockDim.x) {
         auto j = blockDim.x * i + blockDim.x - 1;
         psum[i] = (j < size) ? co[j] : T(0);
