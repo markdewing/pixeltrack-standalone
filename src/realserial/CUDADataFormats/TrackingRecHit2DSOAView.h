@@ -28,39 +28,39 @@ public:
     uint32_t nHits() const { return m_nHits; }
 
     float& xLocal(int i) { return m_xl[i]; }
-    float xLocal(int i) const { return __ldg(m_xl + i); }
+    float xLocal(int i) const { return m_xl[i]; }
     float& yLocal(int i) { return m_yl[i]; }
-    float yLocal(int i) const { return __ldg(m_yl + i); }
+    float yLocal(int i) const { return m_yl[i]; }
 
     float& xerrLocal(int i) { return m_xerr[i]; }
-    float xerrLocal(int i) const { return __ldg(m_xerr + i); }
+    float xerrLocal(int i) const { return m_xerr[i]; }
     float& yerrLocal(int i) { return m_yerr[i]; }
-    float yerrLocal(int i) const { return __ldg(m_yerr + i); }
+    float yerrLocal(int i) const { return m_yerr[i]; }
 
     float& xGlobal(int i) { return m_xg[i]; }
-    float xGlobal(int i) const { return __ldg(m_xg + i); }
+    float xGlobal(int i) const { return m_xg[i]; }
     float& yGlobal(int i) { return m_yg[i]; }
-    float yGlobal(int i) const { return __ldg(m_yg + i); }
+    float yGlobal(int i) const { return m_yg[i]; }
     float& zGlobal(int i) { return m_zg[i]; }
-    float zGlobal(int i) const { return __ldg(m_zg + i); }
+    float zGlobal(int i) const { return m_zg[i]; }
     float& rGlobal(int i) { return m_rg[i]; }
-    float rGlobal(int i) const { return __ldg(m_rg + i); }
+    float rGlobal(int i) const { return m_rg[i]; }
 
     int16_t& iphi(int i) { return m_iphi[i]; }
-    int16_t iphi(int i) const { return __ldg(m_iphi + i); }
+    int16_t iphi(int i) const { return m_iphi[i]; }
 
     int32_t& charge(int i) { return m_charge[i]; }
-    int32_t charge(int i) const { return __ldg(m_charge + i); }
+    int32_t charge(int i) const { return m_charge[i]; }
     int16_t& clusterSizeX(int i) { return m_xsize[i]; }
-    int16_t clusterSizeX(int i) const { return __ldg(m_xsize + i); }
+    int16_t clusterSizeX(int i) const { return m_xsize[i]; }
     int16_t& clusterSizeY(int i) { return m_ysize[i]; }
-    int16_t clusterSizeY(int i) const { return __ldg(m_ysize + i); }
+    int16_t clusterSizeY(int i) const { return m_ysize[i]; }
     uint16_t& detectorIndex(int i) { return m_detInd[i]; }
-    uint16_t detectorIndex(int i) const { return __ldg(m_detInd + i); }
+    uint16_t detectorIndex(int i) const { return m_detInd[i]; }
 
     pixelCPEforGPU::ParamsOnGPU const& cpeParams() const { return *m_cpeParams; }
 
-    uint32_t hitsModuleStart(int i) const { return __ldg(m_hitsModuleStart + i); }
+    uint32_t hitsModuleStart(int i) const { return m_hitsModuleStart[i]; }
 
     uint32_t* hitsLayerStart() { return m_hitsLayerStart; }
     uint32_t const* hitsLayerStart() const { return m_hitsLayerStart; }

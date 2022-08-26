@@ -52,11 +52,11 @@ public:
   public:
     // DeviceConstView() = default;
 
-      uint16_t xx(int i) const { return __ldg(xx_ + i); }
-      uint16_t yy(int i) const { return __ldg(yy_ + i); }
-      uint16_t adc(int i) const { return __ldg(adc_ + i); }
-      uint16_t moduleInd(int i) const { return __ldg(moduleInd_ + i); }
-      int32_t clus(int i) const { return __ldg(clus_ + i); }
+      uint16_t xx(int i) const { return xx_[i]; }
+      uint16_t yy(int i) const { return yy_[i]; }
+      uint16_t adc(int i) const { return adc_[i]; }
+      uint16_t moduleInd(int i) const { return moduleInd_[i]; }
+      int32_t clus(int i) const { return clus_[i]; }
 
     friend class SiPixelDigisSoA;
 

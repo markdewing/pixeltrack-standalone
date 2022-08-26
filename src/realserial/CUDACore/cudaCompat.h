@@ -68,10 +68,6 @@ namespace cms {
       return ret;
     }
 
-    template <typename T>
-    inline T __ldg(T const* x) {
-      return *x;
-    }
   }  // namespace cudacompat
 }  // namespace cms
 
