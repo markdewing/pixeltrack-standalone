@@ -13,6 +13,9 @@
 namespace edmplugin {
   PluginManager::PluginManager() {
     std::ifstream pluginMap(STR(LIB_DIR) "/plugins.txt");
+    if (!pluginMap.is_open()) {
+        std::cout << "Failed to open plugins.txt from " << STR(LIB_DIR) << std::endl;
+    }
     std::string plugin, library;
     while (pluginMap >> plugin >> library) {
       //std::cout << "plugin " << plugin << " in " << library << std::endl;
