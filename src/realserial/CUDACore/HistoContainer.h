@@ -161,31 +161,19 @@ namespace cms {
 
          void add(CountersOnly const &co) {
         for (uint32_t i = 0; i < totbins(); ++i) {
-#ifdef __CUDA_ARCH__
-          atomicAdd(off + i, co.off[i]);
-#else
           auto &a = (std::atomic<Counter> &)(off[i]);
           a += co.off[i];
-#endif
         }
       }
 
       static    uint32_t atomicIncrement(Counter &x) {
-#ifdef __CUDA_ARCH__
-        return atomicAdd(&x, 1);
-#else
         auto &a = (std::atomic<Counter> &)(x);
         return a++;
-#endif
       }
 
       static    uint32_t atomicDecrement(Counter &x) {
-#ifdef __CUDA_ARCH__
-        return atomicSub(&x, 1);
-#else
         auto &a = (std::atomic<Counter> &)(x);
         return a--;
-#endif
       }
 
          void countDirect(T b) {
