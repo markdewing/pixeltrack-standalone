@@ -19,13 +19,16 @@ namespace gpuClustering {
       uint32_t const* __restrict__ moduleId,     // module id of each module
       int32_t* __restrict__ clusterId,           // modified: cluster id of each pixel
       uint32_t numElements) {
-     int32_t charge[MaxNumClustersPerModules];
-     uint8_t ok[MaxNumClustersPerModules];
-     uint16_t newclusId[MaxNumClustersPerModules];
 
-    uint32_t firstModule = 0;
+
     auto endModule = moduleStart[0];
-    for (auto module = firstModule; module < endModule; module += 1) {
+#pragma omp target teams distribute parallel for map(to: adc[:numElements], \
+                                                         moduleStart[:MaxNumModules+1], \
+                                                         moduleId[:MaxNumModules]) \
+                                                 map(tofrom: id[:numElements], \
+                                                             nClustersInModule[:MaxNumModules], \
+                                                             clusterId[:numElements])
+    for (uint32_t module = 0; module < endModule; module++) {
       auto firstPixel = moduleStart[1 + module];
       auto thisModuleId = id[firstPixel];
       assert(thisModuleId < MaxNumModules);
@@ -65,20 +68,24 @@ namespace gpuClustering {
           printf("start cluster charge cut for module %d in block %d\n", thisModuleId, 0);
 #endif
 
+      int32_t charge[MaxNumClustersPerModules];
+      uint8_t ok[MaxNumClustersPerModules];
+      uint16_t newclusId[MaxNumClustersPerModules];
+
       assert(nclus <= MaxNumClustersPerModules);
       for (uint32_t i = 0; i < nclus; i++) {
         charge[i] = 0;
       }
-      
 
       for (auto i = first; i < numElements; i++) {
         if (id[i] == InvId)
           continue;  // not valid
         if (id[i] != thisModuleId)
           break;  // end of module
-        atomicAdd(&charge[clusterId[i]], adc[i]);
+        //atomicAdd(&charge[clusterId[i]], adc[i]);
+#pragma omp atomic update
+        charge[clusterId[i]] += adc[i];
       }
-      
 
       auto chargeCut = thisModuleId < 96 ? 2000 : 4000;  // move in constants (calib?)
       for (uint32_t i = 0; i < nclus; i++) {

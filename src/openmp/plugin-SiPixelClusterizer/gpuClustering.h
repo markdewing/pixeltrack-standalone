@@ -21,6 +21,7 @@ namespace gpuClustering {
                                int32_t* __restrict__ clusterId,
                                int numElements) {
     int first = 0;
+#pragma omp target teams distribute parallel for map(tofrom:moduleStart[:MaxNumModules+1],clusterId[:numElements]) map(to:id[:numElements])
     for (int i = first; i < numElements; i++) {
       clusterId[i] = i;
       if (InvId == id[i])
@@ -30,8 +31,15 @@ namespace gpuClustering {
         --j;
       if (j < 0 or id[j] != id[i]) {
         // boundary...
-        auto loc = atomicInc(moduleStart, MaxNumModules);
-        moduleStart[loc + 1] = i;
+        //auto loc = atomicInc(moduleStart, MaxNumModules);
+        //moduleStart[loc + 1] = i;
+#pragma omp critical
+        {
+          auto loc = moduleStart[0];
+          if (loc < MaxNumModules)
+              moduleStart[0]++;
+          moduleStart[loc+1] = i;
+        }
       }
     }
   }
@@ -49,9 +57,15 @@ namespace gpuClustering {
                int numElements) {
      int msize;
 
-    uint32_t firstModule = 0;
     auto endModule = moduleStart[0];
-    for (auto module = firstModule; module < endModule; module += 1) {
+#pragma omp target teams distribute parallel for map(to:moduleStart[:MaxNumModules+1], \
+                                                       id[:numElements], \
+                                                       x[:numElements], \
+                                                       y[:numElements]) \
+                                                 map(tofrom:nClustersInModule[:MaxNumModules], \
+                                                            moduleId[:MaxNumModules], \
+                                                            clusterId[:numElements])
+    for (uint32_t module = 0; module < endModule; module++) {
       auto firstPixel = moduleStart[1 + module];
       auto thisModuleId = id[firstPixel];
       assert(thisModuleId < MaxNumModules);
@@ -73,7 +87,9 @@ namespace gpuClustering {
         if (id[i] == InvId)  // skip invalid pixels
           continue;
         if (id[i] != thisModuleId) {  // find the first pixel in a different module
-          atomicMin(&msize, i);
+          //atomicMin(&msize, i);
+#pragma omp critical
+          msize = std::min(msize, i);
           break;
         }
       }
@@ -114,7 +130,10 @@ namespace gpuClustering {
           continue;
         hist.count(y[i]);
 #ifdef GPU_DEBUG
-        atomicAdd(&totGood, 1);
+        // Atomic add fails at runtime with:
+        // CUDA error: operation not supported on global/shared address space
+       #pragma omp critical
+          totGood++;
 #endif
       }
       
@@ -135,7 +154,8 @@ namespace gpuClustering {
         hist.fill(y[i], i - firstPixel);
       }
 
-      auto maxiter = hist.size();
+      //auto maxiter = hist.size();
+      constexpr int maxiter  = 1024;
       // allocate space for duplicate pixels: a pixel can appear more than once with different charge in the same event
       constexpr int maxNeighbours = 10;
       assert((hist.size() / 1) <= maxiter);
@@ -154,9 +174,13 @@ namespace gpuClustering {
       
       for (uint32_t j = 0; j < Hist::nbins(); j++) {
         if (hist.size(j) > 60)
-          atomicAdd(&n60, 1);
+#pragma omp atomic update
+            n60++;
+          //atomicAdd(&n60, 1);
         if (hist.size(j) > 40)
-          atomicAdd(&n40, 1);
+#pragma omp atomic update
+            n40++;
+          //atomicAdd(&n40, 1);
       }
       
       if (true) {
@@ -184,8 +208,12 @@ namespace gpuClustering {
           assert(m != i);
           assert(int(y[m]) - int(y[i]) >= 0);
           assert(int(y[m]) - int(y[i]) <= 1);
-          if (std::abs(int(x[m]) - int(x[i])) > 1)
-            continue;
+          // nvlink error   : Undefined reference to 'abs' in '/tmp/SiPixelRawToClusterGPUKernel.cc-nvptx64-nvidia-cuda-sm_61-4fd64f.cubin'
+          //if (std::abs(int(x[m]) - int(x[i])) > 1)
+          //  continue;
+          if ( (int(x[m]) - int(x[i])) > 1 || (int(x[m]) - int(x[i])) < -1)
+              continue;
+
           auto l = nnn[k]++;
           assert(l < maxNeighbours);
           nn[k][l] = *p;
@@ -217,12 +245,22 @@ namespace gpuClustering {
               auto l = nn[k][kk];
               auto m = l + firstPixel;
               assert(m != i);
-              auto old = atomicMin(&clusterId[m], clusterId[i]);
-              if (old != clusterId[i]) {
-                // end the loop only if no changes were applied
-                more = true;
+              //auto old = atomicMin(&clusterId[m], clusterId[i]);
+              //if (old != clusterId[i]) {
+              //  // end the loop only if no changes were applied
+              //  more = true;
+              //}
+              //atomicMin(&clusterId[i], old);
+              #pragma omp critical
+              {
+                auto old = clusterId[m];
+                clusterId[m] = std::min(clusterId[m], clusterId[i]);
+                if (old != clusterId[i]) {
+                    // end the loop only if no changes were applied
+                    more = true;
+                }
+                clusterId[i] = std::min(clusterId[i], old);
               }
-              atomicMin(&clusterId[i], old);
             }  // nnloop
           }    // pixel loop
         }
@@ -253,8 +291,15 @@ namespace gpuClustering {
         if (id[i] == InvId)  // skip invalid pixels
           continue;
         if (clusterId[i] == i) {
-          auto old = atomicInc(&foundClusters, 0xffffffff);
-          clusterId[i] = -(old + 1);
+          //auto old = atomicInc(&foundClusters, 0xffffffff);
+          //clusterId[i] = -(old + 1);
+#pragma omp critical
+          {
+            auto old = foundClusters;
+            if (foundClusters < 0xffffffff)
+                foundClusters++;
+            clusterId[i] = -(old + 1);
+          }
         }
       }
       
