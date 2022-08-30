@@ -135,20 +135,18 @@ int main() {
   }
   std::cout << "filled with " << n << " elements " << double(ave) / n << ' ' << imax << ' ' << nz << std::endl;
 
-  auto a_d = std::make_unique<Assoc>();
-  auto sa_d = std::make_unique<SmallAssoc>();
+  Assoc la;
+  SmallAssoc sa_d;
   auto v_d = tr.data();
 
-  launchZero(a_d.get(), 0);
+  launchZero(&la, 0);
 
-  count(v_d, a_d.get(), N);
-  launchFinalize(a_d.get());
-  verify(a_d.get());
-  fill(v_d, a_d.get(), N);
+  count(v_d, &la, N);
+  launchFinalize(&la);
+  verify(&la);
+  fill(v_d, &la, N);
 
-  Assoc la;
 
-  memcpy(&la, a_d.get(), sizeof(Assoc));  // not required, easier
 
   std::cout << la.size() << std::endl;
   imax = 0;
@@ -171,15 +169,13 @@ int main() {
   AtomicPairCounter dc(0);
 
   dc_d = &dc;
-  fillBulk(dc_d, v_d, a_d.get(), N);
-  finalizeBulk(dc_d, a_d.get());
-  verifyBulk(a_d.get(), dc_d);
-  memcpy(&la, a_d.get(), sizeof(Assoc));
-
+  fillBulk(dc_d, v_d, &la, N);
+  finalizeBulk(dc_d, &la);
+  verifyBulk(&la, dc_d);
   AtomicPairCounter sdc(0);
-  fillBulk(&sdc, v_d, sa_d.get(), N);
-  finalizeBulk(&sdc, sa_d.get());
-  verifyBulk(sa_d.get(), &sdc);
+  fillBulk(&sdc, v_d, &sa_d, N);
+  finalizeBulk(&sdc, &sa_d);
+  verifyBulk(&sa_d, &sdc);
 
   std::cout << "final counter value " << dc.get().n << ' ' << dc.get().m << std::endl;
 
