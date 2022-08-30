@@ -35,12 +35,14 @@ namespace cms {
         Counters get() const { return counter.counters; }
 
       // increment n by 1 and m by i.  return previous value
-         Counters add(uint32_t i) {
+      Counters add(uint32_t i) {
         c_type c = i;
         c += incr;
         Atomic2 ret;
-        ret.ac = counter.ac;
-        counter.ac += c;
+        //ret.ac = counter.ac;
+        //counter.ac += c;
+#pragma omp atomic capture
+        {ret.ac = counter.ac; counter.ac += c;}
         return ret.counters;
       }
 

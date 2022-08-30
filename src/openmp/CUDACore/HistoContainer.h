@@ -150,36 +150,46 @@ namespace cms {
           i = 0;
       }
 
-         void add(CountersOnly const &co) {
+      void add(CountersOnly const &co) {
         for (uint32_t i = 0; i < totbins(); ++i) {
-          auto &a = (std::atomic<Counter> &)(off[i]);
-          a += co.off[i];
+          //auto &a = (std::atomic<Counter> &)(off[i]);
+          //a += co.off[i];
+#pragma omp atomic update
+          off[i] += co.off[i];
         }
       }
 
       static    uint32_t atomicIncrement(Counter &x) {
-        auto &a = (std::atomic<Counter> &)(x);
-        return a++;
+        //auto &a = (std::atomic<Counter> &)(x);
+        //return a++;
+        Counter b;
+#pragma omp atomic capture
+        {b = x; x++;}
+        return b;
       }
 
       static    uint32_t atomicDecrement(Counter &x) {
-        auto &a = (std::atomic<Counter> &)(x);
-        return a--;
+        //auto &a = (std::atomic<Counter> &)(x);
+        //return a--;
+        Counter b;
+#pragma omp atomic capture
+        {b = x; x--;}
+        return b;
       }
 
-         void countDirect(T b) {
+      void countDirect(T b) {
         assert(b < nbins());
         atomicIncrement(off[b]);
       }
 
-         void fillDirect(T b, index_type j) {
+      void fillDirect(T b, index_type j) {
         assert(b < nbins());
         auto w = atomicDecrement(off[b]);
         assert(w > 0);
         bins[w - 1] = j;
       }
 
-         int32_t bulkFill(AtomicPairCounter &apc, index_type const *v, uint32_t n) {
+      int32_t bulkFill(AtomicPairCounter &apc, index_type const *v, uint32_t n) {
         auto c = apc.add(n);
         if (c.m >= nbins())
           return -int32_t(c.m);
@@ -189,11 +199,11 @@ namespace cms {
         return c.m;
       }
 
-         void bulkFinalize(AtomicPairCounter const &apc) {
+      void bulkFinalize(AtomicPairCounter const &apc) {
         off[apc.get().m] = apc.get().n;
       }
 
-         void bulkFinalizeFill(AtomicPairCounter const &apc) {
+      void bulkFinalizeFill(AtomicPairCounter const &apc) {
         auto m = apc.get().m;
         auto n = apc.get().n;
         if (m >= nbins()) {  // overflow!
@@ -206,13 +216,13 @@ namespace cms {
         }
       }
 
-         void count(T t) {
+      void count(T t) {
         uint32_t b = bin(t);
         assert(b < nbins());
         atomicIncrement(off[b]);
       }
 
-         void fill(T t, index_type j) {
+      void fill(T t, index_type j) {
         uint32_t b = bin(t);
         assert(b < nbins());
         auto w = atomicDecrement(off[b]);
@@ -220,7 +230,7 @@ namespace cms {
         bins[w - 1] = j;
       }
 
-         void count(T t, uint32_t nh) {
+      void count(T t, uint32_t nh) {
         uint32_t b = bin(t);
         assert(b < nbins());
         b += histOff(nh);
@@ -228,7 +238,7 @@ namespace cms {
         atomicIncrement(off[b]);
       }
 
-         void fill(T t, index_type j, uint32_t nh) {
+      void fill(T t, index_type j, uint32_t nh) {
         uint32_t b = bin(t);
         assert(b < nbins());
         b += histOff(nh);
@@ -238,7 +248,7 @@ namespace cms {
         bins[w - 1] = j;
       }
 
-         void finalize(Counter *ws = nullptr) {
+      void finalize(Counter *ws = nullptr) {
         assert(off[totbins() - 1] == 0);
         blockPrefixScan(off, totbins(), ws);
         assert(off[totbins() - 1] == off[totbins() - 2]);
