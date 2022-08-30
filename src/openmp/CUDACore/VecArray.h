@@ -8,7 +8,7 @@
 #include "CUDACore/cudaCompat.h"
 
 namespace cms {
-  namespace cuda {
+  namespace openmp {
 
     template <class T, int maxSize>
     class VecArray {

@@ -7,15 +7,15 @@
 #include <memory>
 
 #include "CUDACore/HistoContainer.h"
-using cms::cuda::AtomicPairCounter;
+using cms::openmp::AtomicPairCounter;
 
 constexpr uint32_t MaxElem = 64000;
 constexpr uint32_t MaxTk = 8000;
 constexpr uint32_t MaxAssocs = 4 * MaxTk;
 
-using Assoc = cms::cuda::OneToManyAssoc<uint16_t, MaxElem, MaxAssocs>;
-using SmallAssoc = cms::cuda::OneToManyAssoc<uint16_t, 128, MaxAssocs>;
-using Multiplicity = cms::cuda::OneToManyAssoc<uint16_t, 8, MaxTk>;
+using Assoc = cms::openmp::OneToManyAssoc<uint16_t, MaxElem, MaxAssocs>;
+using SmallAssoc = cms::openmp::OneToManyAssoc<uint16_t, 128, MaxAssocs>;
+using Multiplicity = cms::openmp::OneToManyAssoc<uint16_t, 8, MaxTk>;
 using TK = std::array<uint16_t, 4>;
 
  void countMultiLocal(TK const* __restrict__ tk, Multiplicity* __restrict__ assoc, int32_t n) {

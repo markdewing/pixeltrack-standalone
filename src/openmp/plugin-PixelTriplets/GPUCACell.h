@@ -32,7 +32,7 @@ public:
   using Hits = TrackingRecHit2DSOAView;
   using hindex_type = Hits::hindex_type;
 
-  using TmpTuple = cms::cuda::VecArray<uint32_t, 6>;
+  using TmpTuple = cms::openmp::VecArray<uint32_t, 6>;
 
   using HitContainer = pixelTrack::HitContainer;
   using Quality = trackQuality::Quality;
@@ -268,7 +268,7 @@ public:
                                        GPUCACell* __restrict__ cells,
                                        CellTracksVector& cellTracks,
                                        HitContainer& foundNtuplets,
-                                       cms::cuda::AtomicPairCounter& apc,
+                                       cms::openmp::AtomicPairCounter& apc,
                                        Quality* __restrict__ quality,
                                        TmpTuple& tmpNtuplet,
                                        const unsigned int minHitsPerNtuplet,
@@ -339,7 +339,7 @@ inline void GPUCACell::find_ntuplets<0>(Hits const& hh,
                                                    GPUCACell* __restrict__ cells,
                                                    CellTracksVector& cellTracks,
                                                    HitContainer& foundNtuplets,
-                                                   cms::cuda::AtomicPairCounter& apc,
+                                                   cms::openmp::AtomicPairCounter& apc,
                                                    Quality* __restrict__ quality,
                                                    TmpTuple& tmpNtuplet,
                                                    const unsigned int minHitsPerNtuplet,

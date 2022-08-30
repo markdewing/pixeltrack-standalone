@@ -48,21 +48,21 @@ namespace CAConstants {
   using tindex_type = uint16_t;  //  for tuples
 
 #ifndef ONLY_PHICUT
-  using CellNeighbors = cms::cuda::VecArray<uint32_t, 36>;
-  using CellTracks = cms::cuda::VecArray<tindex_type, 48>;
+  using CellNeighbors = cms::openmp::VecArray<uint32_t, 36>;
+  using CellTracks = cms::openmp::VecArray<tindex_type, 48>;
 #else
-  using CellNeighbors = cms::cuda::VecArray<uint32_t, 64>;
-  using CellTracks = cms::cuda::VecArray<tindex_type, 64>;
+  using CellNeighbors = cms::openmp::VecArray<uint32_t, 64>;
+  using CellTracks = cms::openmp::VecArray<tindex_type, 64>;
 #endif
 
-  using CellNeighborsVector = cms::cuda::SimpleVector<CellNeighbors>;
-  using CellTracksVector = cms::cuda::SimpleVector<CellTracks>;
+  using CellNeighborsVector = cms::openmp::SimpleVector<CellNeighbors>;
+  using CellTracksVector = cms::openmp::SimpleVector<CellTracks>;
 
-  using OuterHitOfCell = cms::cuda::VecArray<uint32_t, maxCellsPerHit()>;
-  using TuplesContainer = cms::cuda::OneToManyAssoc<hindex_type, maxTuples(), 5 * maxTuples()>;
+  using OuterHitOfCell = cms::openmp::VecArray<uint32_t, maxCellsPerHit()>;
+  using TuplesContainer = cms::openmp::OneToManyAssoc<hindex_type, maxTuples(), 5 * maxTuples()>;
   using HitToTuple =
-      cms::cuda::OneToManyAssoc<tindex_type, pixelGPUConstants::maxNumberOfHits, 4 * maxTuples()>;  // 3.5 should be enough
-  using TupleMultiplicity = cms::cuda::OneToManyAssoc<tindex_type, 8, maxTuples()>;
+      cms::openmp::OneToManyAssoc<tindex_type, pixelGPUConstants::maxNumberOfHits, 4 * maxTuples()>;  // 3.5 should be enough
+  using TupleMultiplicity = cms::openmp::OneToManyAssoc<tindex_type, 8, maxTuples()>;
 
 }  // namespace CAConstants
 

@@ -19,13 +19,13 @@ public:
 
   const PixelFormatterErrors& formatterErrors() const { return formatterErrors_h; }
 
-  cms::cuda::SimpleVector<PixelErrorCompact>* error() { return error_d.get(); }
-  cms::cuda::SimpleVector<PixelErrorCompact> const* error() const { return error_d.get(); }
-  cms::cuda::SimpleVector<PixelErrorCompact> const* c_error() const { return error_d.get(); }
+  cms::openmp::SimpleVector<PixelErrorCompact>* error() { return error_d.get(); }
+  cms::openmp::SimpleVector<PixelErrorCompact> const* error() const { return error_d.get(); }
+  cms::openmp::SimpleVector<PixelErrorCompact> const* c_error() const { return error_d.get(); }
 
 private:
   std::unique_ptr<PixelErrorCompact[]> data_d;
-  std::unique_ptr<cms::cuda::SimpleVector<PixelErrorCompact>> error_d;
+  std::unique_ptr<cms::openmp::SimpleVector<PixelErrorCompact>> error_d;
   PixelFormatterErrors formatterErrors_h;
 };
 

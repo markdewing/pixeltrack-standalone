@@ -44,7 +44,7 @@ namespace gpuVertexFinder {
     assert(pdata);
     assert(zt);
 
-    using Hist = cms::cuda::HistoContainer<uint8_t, 256, 16000, 8, uint16_t>;
+    using Hist = cms::openmp::HistoContainer<uint8_t, 256, 16000, 8, uint16_t>;
      Hist hist;
      typename Hist::Counter hws[32];
     for (uint32_t j = 0; j < Hist::totbins(); j++) {
@@ -97,7 +97,7 @@ namespace gpuVertexFinder {
         nn[i]++;
       };
 
-      cms::cuda::forEachInBins(hist, izt[i], 1, loop);
+      cms::openmp::forEachInBins(hist, izt[i], 1, loop);
     }
 
      int nloops;
@@ -165,7 +165,7 @@ namespace gpuVertexFinder {
         mdist = dist;
         iv[i] = iv[j];  // assign to cluster (better be unique??)
       };
-      cms::cuda::forEachInBins(hist, izt[i], 1, loop);
+      cms::openmp::forEachInBins(hist, izt[i], 1, loop);
     }
 
      unsigned int foundClusters;
