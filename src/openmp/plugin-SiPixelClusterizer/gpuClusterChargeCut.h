@@ -83,7 +83,7 @@ namespace gpuClustering {
 
       // renumber
 
-      cms::cuda::blockPrefixScan(newclusId, nclus);
+      cms::openmp::blockPrefixScan(newclusId, nclus);
 
       assert(nclus >= newclusId[nclus - 1]);
 

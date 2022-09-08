@@ -48,7 +48,7 @@ namespace gpuVertexFinder {
     assert(pdata);
     assert(zt);
 
-    using Hist = cms::cuda::HistoContainer<uint8_t, 256, 16000, 8, uint16_t>;
+    using Hist = cms::openmp::HistoContainer<uint8_t, 256, 16000, 8, uint16_t>;
     Hist hist;
 
     for (uint32_t j = 0; j < Hist::totbins(); j++) {
@@ -96,7 +96,7 @@ namespace gpuVertexFinder {
         nn[i]++;
       };
 
-      cms::cuda::forEachInBins(hist, izt[i], 1, loop);
+      cms::openmp::forEachInBins(hist, izt[i], 1, loop);
     }
 
     // find closest above me .... (we ignore the possibility of two j at same distance from i)
@@ -115,7 +115,7 @@ namespace gpuVertexFinder {
         mdist = dist;
         iv[i] = j;  // assign to cluster (better be unique??)
       };
-      cms::cuda::forEachInBins(hist, izt[i], 1, loop);
+      cms::openmp::forEachInBins(hist, izt[i], 1, loop);
     }
 
 #ifdef GPU_DEBUG
@@ -162,7 +162,7 @@ namespace gpuVertexFinder {
         mdist = dist;
         minJ = j;
       };
-      cms::cuda::forEachInBins(hist, izt[i], 1, loop);
+      cms::openmp::forEachInBins(hist, izt[i], 1, loop);
       // should belong to the same cluster...
       assert(iv[i] == iv[minJ]);
       assert(nn[i] <= nn[iv[i]]);

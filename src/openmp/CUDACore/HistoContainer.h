@@ -13,7 +13,7 @@
 #include "CUDACore/prefixScan.h"
 
 namespace cms {
-  namespace cuda {
+  namespace openmp {
 
     template <typename Histo, typename T>
     void countFromVector(Histo *__restrict__ h,

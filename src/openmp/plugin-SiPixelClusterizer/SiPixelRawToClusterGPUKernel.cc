@@ -350,7 +350,7 @@ namespace pixelgpudetails {
                         uint32_t *pdigi,
                         uint32_t *rawIdArr,
                         uint16_t *moduleId,
-                        cms::cuda::SimpleVector<PixelErrorCompact> *err,
+                        cms::openmp::SimpleVector<PixelErrorCompact> *err,
                         bool useQualityInfo,
                         bool includeErrors,
                         bool debug) {
@@ -472,8 +472,8 @@ namespace pixelgpudetails {
     }
 
     uint32_t ws[32];
-    cms::cuda::blockPrefixScan(moduleStart + 1, moduleStart + 1, 1024);
-    cms::cuda::blockPrefixScan(moduleStart + 1025, moduleStart + 1025, gpuClustering::MaxNumModules - 1024);
+    cms::openmp::blockPrefixScan(moduleStart + 1, moduleStart + 1, 1024);
+    cms::openmp::blockPrefixScan(moduleStart + 1025, moduleStart + 1025, gpuClustering::MaxNumModules - 1024);
 
     for (int i = first + 1025, iend = gpuClustering::MaxNumModules + 1; i < iend; i++) {
       moduleStart[i] += moduleStart[1024];

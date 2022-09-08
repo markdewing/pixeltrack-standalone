@@ -6,7 +6,7 @@
 
 #include "CUDACore/HistoContainer.h"
 
-using namespace cms::cuda;
+using namespace cms::openmp;
 
 template <typename T, int NBINS = 128, int S = 8 * sizeof(T), int DELTA = 1000>
 void go() {

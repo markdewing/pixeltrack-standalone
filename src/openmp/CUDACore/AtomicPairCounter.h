@@ -6,7 +6,7 @@
 #include "CUDACore/cudaCompat.h"
 
 namespace cms {
-  namespace cuda {
+  namespace openmp {
 
     class AtomicPairCounter {
     public:

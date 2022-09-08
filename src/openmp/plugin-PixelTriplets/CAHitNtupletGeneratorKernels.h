@@ -190,13 +190,13 @@ private:
   uint32_t* device_nCells_ = nullptr;
 
   unique_ptr<HitToTuple> device_hitToTuple_;
-  cms::cuda::AtomicPairCounter* device_hitToTuple_apc_ = nullptr;
+  cms::openmp::AtomicPairCounter* device_hitToTuple_apc_ = nullptr;
 
-  cms::cuda::AtomicPairCounter* device_hitTuple_apc_ = nullptr;
+  cms::openmp::AtomicPairCounter* device_hitTuple_apc_ = nullptr;
 
   unique_ptr<TupleMultiplicity> device_tupleMultiplicity_;
 
-  unique_ptr<cms::cuda::AtomicPairCounter::c_type[]> device_storage_;
+  unique_ptr<cms::openmp::AtomicPairCounter::c_type[]> device_storage_;
   // params
   Params const& m_params;
 };

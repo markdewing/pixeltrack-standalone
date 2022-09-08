@@ -7,7 +7,7 @@
 #include "CUDACore/cuda_assert.h"
 
 namespace cms {
-  namespace cuda {
+  namespace openmp {
 
     // limited to 32*32 elements....
     template <typename VT>
