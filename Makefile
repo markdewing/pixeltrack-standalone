@@ -322,8 +322,8 @@ ifeq ($(OPENMP_COMPILER), LLVM)
   export OPENMP_TARGETS := -fopenmp-targets=nvptx64-nvidia-cuda --cuda-path=$(CUDA_BASE)
   # HIP
   #export OPENMP_TARGETS := -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdhsa-amd-amdhsa  -march=gfx900
-  export OPENMP_CXXFLAGS := -fPIC -std=c++17 -fopenmp $(OPENMP_TARGETS) -fopenmp-offload-mandatory -DEIGEN_NO_CUDA -DEIGEN_DONT_VECTORIZE --gcc-toolchain=$(GCC_TOOLCHAIN)
-  export OPENMP_LDFLAGS := $(LDFLAGS) --gcc-toolchain=$(GCC_TOOLCHAIN)
+  export OPENMP_CXXFLAGS := -g -O2 -fPIC -std=c++17 -fopenmp $(OPENMP_TARGETS) -fopenmp-offload-mandatory -DEIGEN_NO_CUDA -DEIGEN_DONT_VECTORIZE --gcc-toolchain=$(GCC_TOOLCHAIN)
+  export OPENMP_LDFLAGS := $(LDFLAGS) -g -O2 --gcc-toolchain=$(GCC_TOOLCHAIN)
 else ifeq ($(OPENMP_COMPILER), AMD)
   echo "aompcc not supported"
   # aompcc doesn't support C++ files with .cc suffix

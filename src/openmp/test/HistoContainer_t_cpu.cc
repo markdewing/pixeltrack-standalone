@@ -47,6 +47,7 @@ void go() {
     h4.zero();
     assert(h.size() == 0);
     assert(h4.size() == 0);
+#pragma omp target teams distribute parallel for
     for (long long j = 0; j < N; j++) {
       h.count(v[j]);
       if (j < 2000)
@@ -60,6 +61,7 @@ void go() {
     h4.finalize();
     assert(h.size() == N);
     assert(h4.size() == N);
+#pragma omp target teams distribute parallel for
     for (long long j = 0; j < N; j++) {
       h.fill(v[j], j);
       if (j < 2000)
@@ -102,6 +104,7 @@ void go() {
     }
   }
 
+#pragma omp target teams distribute parallel for
   for (long long j = 0; j < N; j++) {
     auto b0 = h.bin(v[j]);
     int w = 0;

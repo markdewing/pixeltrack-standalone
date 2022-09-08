@@ -39,8 +39,13 @@ namespace cms {
         c_type c = i;
         c += incr;
         Atomic2 ret;
-        ret.ac = counter.ac;
-        counter.ac += c;
+        //ret.ac = counter.ac;
+        //counter.ac += c;
+#pragma omp atomic capture
+        {
+          ret.ac = counter.ac;
+          counter.ac += c;
+        }
         return ret.counters;
       }
 
@@ -48,7 +53,7 @@ namespace cms {
       Atomic2 counter;
     };
 
-  }  // namespace cuda
+  }  // namespace openmp
 }  // namespace cms
 
 #endif  // HeterogeneousCore_CUDAUtilities_interface_AtomicPairCounter_h

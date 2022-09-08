@@ -151,19 +151,29 @@ namespace cms {
 
       inline void add(CountersOnly const &co) {
         for (uint32_t i = 0; i < totbins(); ++i) {
-          auto &a = (std::atomic<Counter> &)(off[i]);
-          a += co.off[i];
+#pragma omp atomic update
+          off[i] += co.off[i];
         }
       }
 
       static inline uint32_t atomicIncrement(Counter &x) {
-        auto &a = (std::atomic<Counter> &)(x);
-        return a++;
+        Counter b;
+#pragma omp atomic capture
+        {
+          b = x;
+          x++;
+        }
+        return b;
       }
 
       static inline uint32_t atomicDecrement(Counter &x) {
-        auto &a = (std::atomic<Counter> &)(x);
-        return a--;
+        Counter b;
+#pragma omp atomic capture
+        {
+          b = x;
+          x--;
+        }
+        return b;
       }
 
       inline void countDirect(T b) {
@@ -261,7 +271,7 @@ namespace cms {
               >
     using OneToManyAssoc = HistoContainer<uint32_t, MAXONES, MAXMANYS, sizeof(uint32_t) * 8, I, 1>;
 
-  }  // namespace cuda
+  }  // namespace openmp
 }  // namespace cms
 
 #endif  // HeterogeneousCore_CUDAUtilities_interface_HistoContainer_h

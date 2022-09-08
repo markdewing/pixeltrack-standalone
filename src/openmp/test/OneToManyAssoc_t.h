@@ -20,6 +20,7 @@ using TK = std::array<uint16_t, 4>;
 
 void countMultiLocal(TK const* __restrict__ tk, Multiplicity* __restrict__ assoc, int32_t n) {
   int first = 0;
+#pragma omp teams distribute parallel for
   for (int i = first; i < n; i++) {
     Multiplicity::CountersOnly local;
     local.zero();
@@ -32,6 +33,7 @@ void countMultiLocal(TK const* __restrict__ tk, Multiplicity* __restrict__ assoc
 
 void countMulti(TK const* __restrict__ tk, Multiplicity* __restrict__ assoc, int32_t n) {
   int first = 0;
+#pragma omp teams distribute parallel for
   for (int i = first; i < n; i++)
     assoc->countDirect(2 + i % 4);
 }
@@ -44,12 +46,13 @@ void verifyMulti(Multiplicity* __restrict__ m1, Multiplicity* __restrict__ m2) {
 
 void count(TK const* __restrict__ tk, Assoc* __restrict__ assoc, int32_t n) {
   int first = 0;
+#pragma omp teams distribute parallel for
   for (int i = first; i < 4 * n; i++) {
     auto k = i / 4;
     auto j = i - 4 * k;
     assert(j < 4);
     if (k >= n)
-      return;
+      continue;
     if (tk[k][j] < MaxElem)
       assoc->countDirect(tk[k][j]);
   }
@@ -57,12 +60,13 @@ void count(TK const* __restrict__ tk, Assoc* __restrict__ assoc, int32_t n) {
 
 void fill(TK const* __restrict__ tk, Assoc* __restrict__ assoc, int32_t n) {
   int first = 0;
+#pragma omp teams distribute parallel for
   for (int i = first; i < 4 * n; i++) {
     auto k = i / 4;
     auto j = i - 4 * k;
     assert(j < 4);
     if (k >= n)
-      return;
+      continue;
     if (tk[k][j] < MaxElem)
       assoc->fillDirect(tk[k][j], k);
   }
@@ -73,6 +77,7 @@ void verify(Assoc* __restrict__ assoc) { assert(assoc->size() < Assoc::capacity(
 template <typename Assoc>
 void fillBulk(AtomicPairCounter* apc, TK const* __restrict__ tk, Assoc* __restrict__ assoc, int32_t n) {
   int first = 0;
+#pragma omp teams distribute parallel for
   for (int k = first; k < n; k++) {
     auto m = tk[k][3] < MaxElem ? 4 : 3;
     assoc->bulkFill(*apc, &tk[k][0], m);
@@ -139,10 +144,19 @@ int main() {
 
   launchZero(&la);
 
-  count(v_d, &la, N);
-  launchFinalize(&la);
+#pragma omp target enter data map(to : la, v_d [0:N])
+#pragma omp target
+  {
+    count(v_d, &la, N);
+    launchFinalize(&la);
+  }
+#pragma omp target update from(la)
   verify(&la);
+
+#pragma omp target
   fill(v_d, &la, N);
+
+#pragma omp target update from(la)
 
   std::cout << la.size() << std::endl;
   imax = 0;
@@ -163,12 +177,20 @@ int main() {
   // now the inverse map (actually this is the direct....)
   AtomicPairCounter dc(0);
 
-  fillBulk(&dc, v_d, &la, N);
-  finalizeBulk(&dc, &la);
+#pragma omp target map(to : dc)
+  {
+    fillBulk(&dc, v_d, &la, N);
+    finalizeBulk(&dc, &la);
+  }
+#pragma omp target update from(la)
   verifyBulk(&la, &dc);
+
   AtomicPairCounter sdc(0);
-  fillBulk(&sdc, v_d, &sa_d, N);
-  finalizeBulk(&sdc, &sa_d);
+#pragma omp target map(tofrom : sdc, sa_d)
+  {
+    fillBulk(&sdc, v_d, &sa_d, N);
+    finalizeBulk(&sdc, &sa_d);
+  }
   verifyBulk(&sa_d, &sdc);
 
   std::cout << "final counter value " << dc.get().n << ' ' << dc.get().m << std::endl;
@@ -193,12 +215,18 @@ int main() {
   launchZero(&m1);
   launchZero(&m2);
 
-  countMulti(v_d, &m1, N);
-  countMultiLocal(v_d, &m2, N);
+#pragma omp target map(tofrom : m1, m2)
+  {
+    countMulti(v_d, &m1, N);
+    countMultiLocal(v_d, &m2, N);
+  }
   verifyMulti(&m1, &m2);
 
-  launchFinalize(&m1);
-  launchFinalize(&m2);
+#pragma omp target map(tofrom : m1, m2)
+  {
+    launchFinalize(&m1);
+    launchFinalize(&m2);
+  }
   verifyMulti(&m1, &m2);
   return 0;
 }
