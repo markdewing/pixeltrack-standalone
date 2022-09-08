@@ -133,20 +133,16 @@ int main() {
   }
   std::cout << "filled with " << n << " elements " << double(ave) / n << ' ' << imax << ' ' << nz << std::endl;
 
-  auto a_d = std::make_unique<Assoc>();
-  auto sa_d = std::make_unique<SmallAssoc>();
+  Assoc la;
+  SmallAssoc sa_d;
   auto v_d = tr.data();
 
-  launchZero(a_d.get());
+  launchZero(&la);
 
-  count(v_d, a_d.get(), N);
-  launchFinalize(a_d.get());
-  verify(a_d.get());
-  fill(v_d, a_d.get(), N);
-
-  Assoc la;
-
-  memcpy(&la, a_d.get(), sizeof(Assoc));  // not required, easier
+  count(v_d, &la, N);
+  launchFinalize(&la);
+  verify(&la);
+  fill(v_d, &la, N);
 
   std::cout << la.size() << std::endl;
   imax = 0;
@@ -165,19 +161,15 @@ int main() {
   std::cout << "found with " << n << " elements " << double(ave) / n << ' ' << imax << ' ' << z << std::endl;
 
   // now the inverse map (actually this is the direct....)
-  AtomicPairCounter* dc_d;
   AtomicPairCounter dc(0);
 
-  dc_d = &dc;
-  fillBulk(dc_d, v_d, a_d.get(), N);
-  finalizeBulk(dc_d, a_d.get());
-  verifyBulk(a_d.get(), dc_d);
-  memcpy(&la, a_d.get(), sizeof(Assoc));
-
+  fillBulk(&dc, v_d, &la, N);
+  finalizeBulk(&dc, &la);
+  verifyBulk(&la, &dc);
   AtomicPairCounter sdc(0);
-  fillBulk(&sdc, v_d, sa_d.get(), N);
-  finalizeBulk(&sdc, sa_d.get());
-  verifyBulk(sa_d.get(), &sdc);
+  fillBulk(&sdc, v_d, &sa_d, N);
+  finalizeBulk(&sdc, &sa_d);
+  verifyBulk(&sa_d, &sdc);
 
   std::cout << "final counter value " << dc.get().n << ' ' << dc.get().m << std::endl;
 
@@ -196,17 +188,17 @@ int main() {
   std::cout << "found with ave occupancy " << double(ave) / N << ' ' << imax << std::endl;
 
   // here verify use of block local counters
-  auto m1_d = std::make_unique<Multiplicity>();
-  auto m2_d = std::make_unique<Multiplicity>();
-  launchZero(m1_d.get());
-  launchZero(m2_d.get());
+  Multiplicity m1;
+  Multiplicity m2;
+  launchZero(&m1);
+  launchZero(&m2);
 
-  countMulti(v_d, m1_d.get(), N);
-  countMultiLocal(v_d, m2_d.get(), N);
-  verifyMulti(m1_d.get(), m2_d.get());
+  countMulti(v_d, &m1, N);
+  countMultiLocal(v_d, &m2, N);
+  verifyMulti(&m1, &m2);
 
-  launchFinalize(m1_d.get());
-  launchFinalize(m2_d.get());
-  verifyMulti(m1_d.get(), m2_d.get());
+  launchFinalize(&m1);
+  launchFinalize(&m2);
+  verifyMulti(&m1, &m2);
   return 0;
 }
