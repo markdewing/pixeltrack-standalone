@@ -24,6 +24,15 @@ namespace gpuClustering {
 
     uint32_t firstModule = 0;
     auto endModule = moduleStart[0];
+    // clang-format off
+#pragma omp target teams distribute parallel for map(to: adc[:numElements], \
+                                                         moduleStart[:MaxNumModules+1], \
+                                                         moduleId[:MaxNumModules]) \
+                                                 map(tofrom: id[:numElements], \
+                                                             nClustersInModule[:MaxNumModules], \
+                                                             clusterId[:numElements]) \
+                                                 private(charge, ok, newclusId)
+    // clang-format on
     for (auto module = firstModule; module < endModule; module += 1) {
       auto firstPixel = moduleStart[1 + module];
       auto thisModuleId = id[firstPixel];
@@ -73,7 +82,8 @@ namespace gpuClustering {
           continue;  // not valid
         if (id[i] != thisModuleId)
           break;  // end of module
-        atomicAdd(&charge[clusterId[i]], adc[i]);
+#pragma omp atomic update
+        charge[clusterId[i]] += adc[i];
       }
 
       auto chargeCut = thisModuleId < 96 ? 2000 : 4000;  // move in constants (calib?)
