@@ -6,7 +6,7 @@
 #include <random>
 
 template <class C>
-  void printIt(C* m) {
+void printIt(C* m) {
 #ifdef TEST_DEBUG
   printf("\nMatrix %dx%d\n", (int)m->rows(), (int)m->cols());
   for (u_int r = 0; r < m->rows(); ++r) {
@@ -21,6 +21,9 @@ template <class C1, class C2>
 bool isEqualFuzzy(C1 a, C2 b, double epsilon = 1e-6) {
   for (unsigned int i = 0; i < a.rows(); ++i) {
     for (unsigned int j = 0; j < a.cols(); ++j) {
+      if (!(std::abs(a(i, j) - b(i, j)) < std::min(std::abs(a(i, j)), std::abs(b(i, j))) * epsilon)) {
+        printf("Matrix equality fail at %d %d a = %g  b = %g\n", i, j, a(i, j), b(i, j));
+      }
       assert(std::abs(a(i, j) - b(i, j)) < std::min(std::abs(a(i, j)), std::abs(b(i, j))) * epsilon);
     }
   }
