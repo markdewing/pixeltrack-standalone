@@ -41,9 +41,6 @@ private:
   static constexpr uint32_t n32 = 9;
   static_assert(sizeof(uint32_t) == sizeof(float));  // just stating the obvious
 
-  unique_ptr<uint16_t[]> m_store16;  //!
-  unique_ptr<float[]> m_store32;     //!
-
   unique_ptr<TrackingRecHit2DSOAView::Hist> m_HistStore;                        //!
   unique_ptr<TrackingRecHit2DSOAView::AverageGeometry> m_AverageGeometryStore;  //!
 
@@ -85,34 +82,31 @@ TrackingRecHit2DHeterogeneous<Traits>::TrackingRecHit2DHeterogeneous(uint32_t nH
   // if ordering is relevant they may have to be stored phi-ordered by layer or so
   // this will break 1to1 correspondence with cluster and module locality
   // so unless proven VERY inefficient we keep it ordered as generated
-  m_store16 = Traits::template make_device_unique<uint16_t[]>(nHits * n16, stream);
-  m_store32 = Traits::template make_device_unique<float[]>(nHits * n32 + 11, stream);
-  m_HistStore = Traits::template make_device_unique<TrackingRecHit2DSOAView::Hist>(stream);
 
-  auto get16 = [&](int i) { return m_store16.get() + i * nHits; };
-  auto get32 = [&](int i) { return m_store32.get() + i * nHits; };
+  m_HistStore = std::make_unique<TrackingRecHit2DSOAView::Hist>();
 
   // copy all the pointers
   m_hist = view->m_hist = m_HistStore.get();
 
-  view->m_xl = get32(0);
-  view->m_yl = get32(1);
-  view->m_xerr = get32(2);
-  view->m_yerr = get32(3);
+  view->m_xl = new float[nHits];
+  view->m_yl = new float[nHits];
+  view->m_xerr = new float[nHits];
+  view->m_yerr = new float[nHits];
 
-  view->m_xg = get32(4);
-  view->m_yg = get32(5);
-  view->m_zg = get32(6);
-  view->m_rg = get32(7);
+  view->m_xg = new float[nHits];
+  view->m_yg = new float[nHits];
+  view->m_zg = new float[nHits];
+  view->m_rg = new float[nHits];
 
-  m_iphi = view->m_iphi = reinterpret_cast<int16_t*>(get16(0));
+  m_iphi =  new int16_t[nHits];
+  view->m_iphi = m_iphi;
 
-  view->m_charge = reinterpret_cast<int32_t*>(get32(8));
-  view->m_xsize = reinterpret_cast<int16_t*>(get16(2));
-  view->m_ysize = reinterpret_cast<int16_t*>(get16(3));
-  view->m_detInd = get16(1);
-
-  m_hitsLayerStart = view->m_hitsLayerStart = reinterpret_cast<uint32_t*>(get32(n32));
+  view->m_charge = new int32_t[nHits];
+  view->m_xsize =  new int16_t[nHits];
+  view->m_ysize =  new int16_t[nHits];
+  view->m_detInd = new uint16_t[nHits];
+  m_hitsLayerStart = new uint32_t[11];
+  view->m_hitsLayerStart = m_hitsLayerStart;
 
   // transfer view
   m_view.reset(view.release());  // NOLINT: std::move() breaks CUDA version
