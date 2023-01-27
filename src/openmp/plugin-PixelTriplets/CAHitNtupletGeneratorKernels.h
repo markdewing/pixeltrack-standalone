@@ -179,7 +179,8 @@ public:
 
 private:
   // workspace
-  unique_ptr<unsigned char[]> cellStorage_;
+  unique_ptr<unsigned char[]> cellNeighborStorage_;
+  unique_ptr<unsigned char[]> cellTracksStorage_;
   unique_ptr<CAConstants::CellNeighborsVector> device_theCellNeighbors_;
   CAConstants::CellNeighbors* device_theCellNeighborsContainer_;
   unique_ptr<CAConstants::CellTracksVector> device_theCellTracks_;
