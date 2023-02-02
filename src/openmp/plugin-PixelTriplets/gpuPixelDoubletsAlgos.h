@@ -52,11 +52,10 @@ namespace gpuPixelDoublets {
 
     using Hist = TrackingRecHit2DSOAView::Hist;
 
-    auto const& __restrict__ hist = hh.phiBinner();
-    uint32_t const* __restrict__ offsets = hh.hitsLayerStart();
-    assert(offsets);
+    uint32_t const* __restrict__ offsets1 = hh.hitsLayerStart();
+    assert(offsets1);
 
-    auto layerSize = [=](uint8_t li) { return offsets[li + 1] - offsets[li]; };
+    auto layerSize = [=](uint8_t li) { return offsets1[li + 1] - offsets1[li]; };
 
     // nPairsMax to be optimized later (originally was 64).
     // If it should be much bigger, consider using a block-wide parallel prefix scan,
@@ -73,12 +72,25 @@ namespace gpuPixelDoublets {
     ntot = innerLayerCumulativeSize[nPairs - 1];
 
     // x runs faster
-    auto idy = 0;
     uint32_t first = 0;
-    auto stride = 1;
 
     uint32_t pairLayerId = 0;  // cannot go backward
-    for (uint32_t j = idy; j < ntot; j += 1) {
+    // clang-format off
+#pragma omp target teams distribute parallel for \
+        map(to:layerPairs[:2*nPairs], \
+               minz[:nPairs], \
+               maxz[:nPairs], \
+               maxr[:nPairs], \
+               phicuts[:nPairs]) \
+        map(tofrom: isOuterHitOfCell[:hh.nHits()], \
+                    cells[:maxNumOfDoublets], \
+                    cellNeighbors[:1], \
+                    cellTracks[:1], \
+                    nCells[:1])
+    // clang-format on
+    for (uint32_t j = 0; j < ntot; j++) {
+      auto const& __restrict__ hist = hh.phiBinner();
+      uint32_t const* __restrict__ offsets = hh.hitsLayerStart();
       while (j >= innerLayerCumulativeSize[pairLayerId++])
         ;
       --pairLayerId;  // move to lower_bound ??
@@ -194,7 +206,7 @@ namespace gpuPixelDoublets {
         auto const* __restrict__ p = hist.begin(kk + hoff);
         auto const* __restrict__ e = hist.end(kk + hoff);
         p += first;
-        for (; p < e; p += stride) {
+        for (; p < e; p++) {
           auto oi = *(p);
           assert(oi >= offsets[outer]);
           assert(oi < offsets[outer + 1]);
