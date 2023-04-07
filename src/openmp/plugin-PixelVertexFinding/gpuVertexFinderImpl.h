@@ -11,12 +11,12 @@ namespace gpuVertexFinder {
     assert(ptracks);
     assert(soa);
     auto const& tracks = *ptracks;
-    auto const& fit = tracks.stateAtBS;
-    auto const* quality = tracks.qualityData();
 
     int nt = TkSoA::stride();
-#pragma omp target teams distribute parallel for map(tofrom:soa[:1],pws[:1]) map(to:quality[:pixelTrack::maxNumber()])
+#pragma omp target teams distribute parallel for map(to:tracks,soa[:1],pws[:1])
     for (int idx = 0; idx < nt; idx++) {
+      auto const& fit = tracks.stateAtBS;
+      auto const* quality = tracks.qualityData();
       auto nHits = tracks.nHits(idx);
       if (nHits == 0)
         continue;
@@ -97,22 +97,25 @@ namespace gpuVertexFinder {
 
     auto ws_d = std::make_unique<WorkSpace>();
 
-    init(soa, ws_d.get());
-    loadTracks(tksoa, soa, ws_d.get(), ptMin);
+    WorkSpace* pws = ws_d.get();
+    init(soa, pws);
+#pragma omp target enter data map(to:soa[:1],pws[:1])
+    loadTracks(tksoa, soa, pws, ptMin);
 
     if (useDensity_) {
-      clusterTracksByDensity(soa, ws_d.get(), minT, eps, errmax, chi2max);
+      clusterTracksByDensity(soa, pws, minT, eps, errmax, chi2max);
     } else if (useDBSCAN_) {
-      clusterTracksDBSCAN(soa, ws_d.get(), minT, eps, errmax, chi2max);
+      clusterTracksDBSCAN(soa, pws, minT, eps, errmax, chi2max);
     } else if (useIterative_) {
-      clusterTracksIterative(soa, ws_d.get(), minT, eps, errmax, chi2max);
+      clusterTracksIterative(soa, pws, minT, eps, errmax, chi2max);
     }
     // std::cout << "found " << (*ws_d).nvIntermediate << " vertices " << std::endl;
-    fitVertices(soa, ws_d.get(), 50.);
+    fitVertices(soa, pws, 50.);
     // one block per vertex!
-    splitVertices(soa, ws_d.get(), 9.f);
-    fitVertices(soa, ws_d.get(), 5000.);
-    sortByPt2(soa, ws_d.get());
+    splitVertices(soa, pws, 9.f);
+    fitVertices(soa, pws, 5000.);
+#pragma omp target exit data map(from:soa[:1],pws[:1])
+    sortByPt2(soa, pws);
 
     return vertices;
   }

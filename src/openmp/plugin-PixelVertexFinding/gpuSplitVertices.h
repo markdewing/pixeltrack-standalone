@@ -18,6 +18,9 @@ namespace gpuVertexFinder {
     constexpr uint32_t MAXTRACKS = WorkSpace::MAXTRACKS;
     constexpr uint32_t MAXVTX = WorkSpace::MAXVTX;
 
+//#pragma omp target update from(data.nvFinal, ws.nvIntermediate, ws.ntrks)
+#pragma omp target teams map(to:pdata[:1],pws[:1])
+    {
     auto& __restrict__ data = *pdata;
     auto& __restrict__ ws = *pws;
     auto nt = ws.ntrks;
@@ -27,7 +30,7 @@ namespace gpuVertexFinder {
     float* __restrict__ wv = data.wv;
     float const* __restrict__ chi2 = data.chi2;
     uint32_t& nvFinal = data.nvFinal;
-    uint32_t& nvIntermediate = ws.nvIntermediate;
+    //uint32_t& nvIntermediate = ws.nvIntermediate;
 
     int32_t const* __restrict__ nn = data.ndof;
     int32_t* __restrict__ iv = ws.iv;
@@ -36,8 +39,9 @@ namespace gpuVertexFinder {
     assert(zt);
 
     // one vertex per block
-#pragma omp target teams distribute map(tofrom:iv[:MAXTRACKS], nvIntermediate) \
-     map(to:nn[:MAXTRACKS],chi2[:MAXVTX],zv[:MAXVTX], wv[:MAXVTX], ezt2[:MAXTRACKS], zt[:MAXTRACKS])
+//#pragma omp target teams distribute map(to: pdata[:1], pws[:1])  \
+//                                    map(tofrom: nvIntermediate)
+#pragma omp distribute
     for (uint32_t kv = 0; kv < nvFinal; kv += 1) {
       if (nn[kv] < 4)
         continue;
@@ -135,7 +139,7 @@ namespace gpuVertexFinder {
       //igv = atomicAdd(&ws.nvIntermediate, 1);
       //igv = ws.nvIntermediate++;
 #pragma omp atomic capture
-      igv = nvIntermediate++;
+      igv = ws.nvIntermediate++;
 
 #pragma omp parallel for
       for (uint32_t k = 0; k < nq; k++) {
@@ -144,6 +148,7 @@ namespace gpuVertexFinder {
       }
 
     }  // loop on vertices
+  } // omp target
   }
 
   void splitVerticesKernel(ZVertices* pdata, WorkSpace* pws, float maxChi2) { splitVertices(pdata, pws, maxChi2); }

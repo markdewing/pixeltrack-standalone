@@ -21,8 +21,19 @@ namespace gpuVertexFinder {
     constexpr uint32_t MAXTRACKS = WorkSpace::MAXTRACKS;
     constexpr uint32_t MAXVTX = WorkSpace::MAXVTX;
 
+    // only for test
+    int noise;
+    if (verbose)
+      noise = 0;
+
     auto& __restrict__ data = *pdata;
     auto& __restrict__ ws = *pws;
+//#pragma omp target update from(data.nvFinal)
+//    auto foundClusters = data.nvFinal;
+#pragma omp target enter data map(to:pdata[:1], pws[:1] ) 
+#pragma omp target
+    {
+    auto foundClusters = data.nvFinal;
     auto nt = ws.ntrks;
     float const* __restrict__ zt = ws.zt;
     float const* __restrict__ ezt2 = ws.ezt2;
@@ -35,29 +46,24 @@ namespace gpuVertexFinder {
     int32_t* __restrict__ nn = data.ndof;
     int32_t* __restrict__ iv = ws.iv;
 
-    assert(pdata);
-    assert(zt);
+    //assert(pdata);
+    //assert(zt);
 
-    assert(nvFinal <= nvIntermediate);
+    //assert(nvFinal <= nvIntermediate);
     nvFinal = nvIntermediate;
-    auto foundClusters = nvFinal;
 
-#pragma omp target enter data map(alloc:zv[:MAXVTX], wv[:MAXVTX], chi2[:MAXVTX], nn[:MAXTRACKS]) \
-                       map(to:iv[:MAXTRACKS], ezt2[:MAXTRACKS], zt[:MAXTRACKS])
+
+
+// Using 1 team
 
     // zero
-//#pragma omp target teams distribute parallel for map(from:zv[:MAXVTX], wv[:MAXVTX], chi2[:MAXVTX])
-#pragma omp target teams distribute parallel for
+#pragma omp parallel for
     for (uint32_t i = 0; i < foundClusters; i++) {
       zv[i] = 0;
       wv[i] = 0;
       chi2[i] = 0;
     }
 
-    // only for test
-    int noise;
-    if (verbose)
-      noise = 0;
 
 // Do assertion checks on CPU
     for (uint32_t i = 0; i < nt; i++) {
@@ -68,8 +74,7 @@ namespace gpuVertexFinder {
     }
 
     // compute cluster location
-//#pragma omp target teams distribute parallel for map(to:iv[:MAXTRACKS],ezt2[:MAXTRACKS],zt[:MAXTRACKS]) map(tofrom:zv[:MAXVTX],wv[:MAXVTX])
-#pragma omp target teams distribute parallel for
+#pragma omp parallel for
     for (uint32_t i = 0; i < nt; i++) {
       if (iv[i] > 9990) {
         //if (verbose)
@@ -87,7 +92,7 @@ namespace gpuVertexFinder {
     }
 
     // reuse nn
-#pragma omp target teams distribute parallel for
+#pragma omp parallel for
     for (uint32_t i = 0; i < foundClusters; i++) {
        // If this assertion is included in this offloaded loop, it fails validation (for events 19,40,41,53,...)
        //  on an AMD target
@@ -101,7 +106,7 @@ namespace gpuVertexFinder {
 
     // compute chi2
 // For an AMD target, adding this loop will result in an assertion gpuSplitVertices.h:66 in event 6
-#pragma omp target teams distribute parallel for
+#pragma omp parallel for
     for (uint32_t i = 0; i < nt; i++) {
       if (iv[i] > 9990)
         continue;
@@ -122,18 +127,20 @@ namespace gpuVertexFinder {
       //atomicAdd(&nn[iv[i]], 1);
     }
 
-#pragma omp target teams distribute parallel for
+#pragma omp parallel for
     for (uint32_t i = 0; i < foundClusters; i++)
       if (nn[i] > 0)
         wv[i] *= float(nn[i]) / chi2[i];
 
-#pragma omp target exit data map(from:zv[:MAXVTX], wv[:MAXVTX] , chi2[:MAXVTX], nn[:MAXTRACKS]) \
-                       map(delete:iv[:MAXTRACKS], ezt2[:MAXTRACKS], zt[:MAXTRACKS])
+    } // pragma omp target
 
-    if (verbose)
-      printf("found %d proto clusters ", foundClusters);
-    if (verbose)
-      printf("and %d noise\n", noise);
+#pragma omp target exit data map(release:pdata[:1], pws[:1] )
+
+
+    //if (verbose)
+    //  printf("found %d proto clusters ", foundClusters);
+    //if (verbose)
+    //  printf("and %d noise\n", noise);
   }
 
   void fitVerticesKernel(ZVertices* pdata,
