@@ -5,7 +5,7 @@
 #include <cassert>
 #include "prefixScan.h"
 
-const uint32_t maxNumModules = 2000;
+const uint32_t MaxNumModules = 2000;
 const uint16_t InvId = 9999;
 constexpr int32_t MaxNumClustersPerModules = 1024;
 
@@ -23,7 +23,7 @@ void clusterChargeCut(uint16_t* id,                 // module id of each pixel (
   for (auto module = 0; module < endModule; module++) {
     auto firstPixel = moduleStart[1 + module];
     auto thisModuleId = id[firstPixel];
-    assert(thisModuleId < maxNumModules);
+    assert(thisModuleId < MaxNumModules);
     // The presence of this assert will cause wrong values in nClustersInModule for LLVM 15
     //assert(thisModuleId == moduleId[module]);
 
@@ -112,9 +112,9 @@ int main() {
 
   const int numElements = 48316;
 
-  uint32_t* moduleStart = new uint32_t[maxNumModules + 1];
-  uint32_t* moduleId = new uint32_t[maxNumModules];
-  uint32_t* nClustersInModule = new uint32_t[maxNumModules];
+  uint32_t* moduleStart = new uint32_t[MaxNumModules + 1];
+  uint32_t* moduleId = new uint32_t[MaxNumModules];
+  uint32_t* nClustersInModule = new uint32_t[MaxNumModules];
   moduleStart[0] = numModules;
 
   for (int i = 0; i < numModules; i++) {
@@ -155,7 +155,7 @@ int main() {
   getline(in, line1);  // Output
   getline(in, line1);  // i nClustersInModule[i]
 
-  uint32_t* refNClustersInModule = new uint32_t[maxNumModules];
+  uint32_t* refNClustersInModule = new uint32_t[MaxNumModules];
   for (int i = 0; i < numModules; i++) {
     int ii;
     int i_ncls;
