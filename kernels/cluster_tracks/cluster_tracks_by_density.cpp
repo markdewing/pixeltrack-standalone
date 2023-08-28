@@ -324,8 +324,8 @@ int main() {
     if (errs > 10)
       break;
   }
-
   all_errs += errs;
+
   errs = 0;
   for (uint32_t i = 0; i < ntrks_out; i++) {
     if (ws.iv[i] != ws_out.iv[i]) {
@@ -335,6 +335,7 @@ int main() {
     if (errs > 10)
       break;
   }
+  all_errs += errs;
 
   if (all_errs == 0)
     std::cout << "Pass" << std::endl;
